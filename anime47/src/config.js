@@ -68,18 +68,21 @@ function extractInitialState(html) {
     return null;
 }
 
-var Response = {
-    success: function(data, nextPage) {
-        return JSON.stringify({
-            status: 200,
-            data: data,
-            next: nextPage ? String(nextPage) : null
-        });
-    },
-    error: function(message) {
-        return JSON.stringify({
-            status: 500,
-            message: message || 'Unknown error'
-        });
-    }
-};
+// Fallback Response object if not globally provided by VBook engine
+if (typeof Response === 'undefined') {
+    Response = {
+        success: function(data, nextPage) {
+            return JSON.stringify({
+                status: 200,
+                data: data,
+                next: nextPage ? String(nextPage) : null
+            });
+        },
+        error: function(message) {
+            return JSON.stringify({
+                status: 500,
+                message: message || 'Unknown error'
+            });
+        }
+    };
+}
