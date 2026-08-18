@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "name": "Anime47",
+    "author": "paparei",
+    "version": 1,
+    "source": "https://anime47.best",
+    "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem-phim)/.*",
+    "description": "Xem anime vietsub online tại Anime47",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "video"
+  },
+  "settings": {
+    "auth_token": {
+      "title": "Anime47 Bearer Token (Nếu cần xem VIP/Thành viên)",
+      "type": "text",
+      "value": ""
+    }
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js",
+    "track": "track.js"
+  }
+}
