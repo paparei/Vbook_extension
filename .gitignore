@@ -16,3 +16,5 @@ package-lock.json
 temp_*
 *.tmp
 *.log
+extension.code-workspace
+build_zip.ps1
