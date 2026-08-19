@@ -97,6 +97,9 @@ function execute(data) {
         type: 'auto',
         headers: headers,
         host: BASE_URL,
-        timeSkip: []
+        timeSkip: [],
+        subtitles: subtitles,
+        subtitle: legacySub,
+        subtitleType: 'vtt'
     });
 }
