@@ -2,10 +2,10 @@
   "metadata": {
     "name": "Anime47",
     "author": "paparei",
-    "version": 2,
+    "version": 3,
     "source": "https://anime47.best",
-    "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem-phim)/.*",
-    "description": "Xem anime vietsub online tại Anime47",
+    "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem)/.*",
+    "description": "Xem anime vietsub online tại Anime47 (cần tài khoản để xem)",
     "locale": "vi_VN",
     "language": "javascript",
     "type": "video"
@@ -19,5 +19,19 @@
     "toc": "toc.js",
     "chap": "chap.js",
     "track": "track.js"
+  },
+  "config": {
+    "a47_email": {
+      "title": "Email đăng nhập Anime47",
+      "mode": "input",
+      "format": "text",
+      "default": ""
+    },
+    "a47_password": {
+      "title": "Mật khẩu Anime47",
+      "mode": "input",
+      "format": "password",
+      "default": ""
+    }
   }
 }

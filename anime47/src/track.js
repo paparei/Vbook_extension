@@ -1,31 +1,40 @@
 load('config.js');
 
-function execute(input) {
-    var data = null;
+function execute(data) {
+    var streamUrl = '';
+    var kind = '';
     try {
-        data = JSON.parse(input);
+        var obj = JSON.parse(data);
+        streamUrl = obj.url || '';
+        kind = obj.type || '';
     } catch (e) {
-        data = { url: input, type: 'auto', referer: BASE_URL };
+        streamUrl = (data || '') + '';
     }
-
-    var streamUrl = data.url || input;
-    var streamType = data.type || (streamUrl.indexOf('.m3u8') !== -1 ? 'native' : 'auto');
-    var referer = data.referer || BASE_URL;
+    if (!streamUrl) return Response.error('Không có luồng phát');
 
     var headers = {
-        'User-Agent': DEFAULT_HEADERS['User-Agent'],
-        'Referer': referer,
+        'User-Agent': UA,
+        'Referer': BASE_URL + '/',
         'Origin': BASE_URL
     };
 
-    var token = getSetting('auth_token');
-    if (token) {
-        headers['Authorization'] = token.indexOf('Bearer ') === 0 ? token : ('Bearer ' + token);
+    // Direct HLS/mp4 stream -> native player
+    if (streamUrl.indexOf('.m3u8') !== -1 || streamUrl.indexOf('.mp4') !== -1 || kind === 'jwplayer' || kind === 'hls') {
+        return Response.success({
+            data: streamUrl,
+            type: 'native',
+            headers: headers,
+            host: BASE_URL,
+            timeSkip: []
+        });
     }
 
+    // Embed/unknown -> let VBook WebView sniff the media
     return Response.success({
         data: streamUrl,
-        type: streamType,
-        headers: headers
+        type: 'auto',
+        headers: headers,
+        host: BASE_URL,
+        timeSkip: []
     });
 }

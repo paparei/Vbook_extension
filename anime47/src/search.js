@@ -1,32 +1,22 @@
 load('config.js');
 
 function execute(key, page) {
-    page = page || 1;
-    page = parseInt(page, 10);
+    page = parseInt(page, 10) || 1;
     var list = [];
     var nextPage = null;
 
-    var searchUrl = API_URL + '/search/full/?keyword=' + encodeURIComponent(key) + '&page=' + page;
-    var json = fetchJson(searchUrl);
+    var json = fetchJson(API_URL + '/search/full/?keyword=' + encodeURIComponent(key) + '&page=' + page, false);
+    var results = json && json.results ? json.results : [];
 
-    if (json && json.results && Array.isArray(json.results)) {
-        for (var i = 0; i < json.results.length; i++) {
-            var item = json.results[i];
-            var link = item.link || (item.id ? ('/phim/' + (item.slug || ('anime-' + item.id)) + '/m' + item.id + '.html') : '');
-            list.push({
-                name: item.title || item.name || '',
-                link: normalizeUrl(link),
-                cover: item.poster_url || item.thumbnail || item.poster || item.cover_url || '',
-                description: item.episode_name || (item.episodes_count ? (item.episodes_count + ' tập') : '') || item.status || '',
-                host: BASE_URL
-            });
-        }
+    for (var i = 0; i < results.length; i++) {
+        var item = toItem(results[i]);
+        if (item) list.push(item);
+    }
 
-        if (json.total_pages && page < json.total_pages) {
-            nextPage = page + 1;
-        } else if (json.results.length >= 24) {
-            nextPage = page + 1;
-        }
+    if (json && json.total_pages && page < json.total_pages) {
+        nextPage = String(page + 1);
+    } else if (results.length >= 24) {
+        nextPage = String(page + 1);
     }
 
     return Response.success(list, nextPage);

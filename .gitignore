@@ -18,3 +18,7 @@ temp_*
 *.log
 extension.code-workspace
 build_zip.ps1
+make_zip.js
+probe.ps1
+fetch_refs.ps1
+ext-vbook-main/
