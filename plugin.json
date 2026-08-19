@@ -15,6 +15,30 @@
       "description": "Xem anime vietsub online tại Anime47",
       "type": "video",
       "locale": "vi_VN"
+    },
+    {
+      "name": "AnimeVsub",
+      "author": "kychi",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animevsub/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animevsub/plugin.json",
+      "version": 1,
+      "source": "https://animevsub.app",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animevsub/icon.png",
+      "description": "Xem anime Vietsub HD miễn phí trên AnimeVsub - kho anime lớn nhất",
+      "type": "video",
+      "locale": "vi_VN"
+    },
+    {
+      "name": "Anime Hay",
+      "author": "kychi",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/plugin.json",
+      "version": 1,
+      "source": "https://animevietsub.gg",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/icon.png",
+      "description": "Xem Anime Hay - miễn phí chất lượng cao với phụ đề Tiếng Việt, Thuyết Minh, Lồng Tiếng (animehay.fm đã chuyển sang animevietsub.gg)",
+      "type": "video",
+      "locale": "vi_VN"
     }
   ]
 }

@@ -21,4 +21,14 @@ build_zip.ps1
 make_zip.js
 probe.ps1
 fetch_refs.ps1
+test_runtime.js
+test_extensions.js
 ext-vbook-main/
+*.json.dump
+*_dump.*
+watch_*.json
+bundle_*.js
+home_dump.html
+page_dump.html
+eps_dump.json
+login_dump.json

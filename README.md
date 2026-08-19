@@ -17,6 +17,8 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 | Tên Extension | Loại | Nguồn | Phiên bản |
 | ------------- | ---- | ----- | --------- |
 | **Anime47** | Video | `https://anime47.best` | v1 |
+| **AnimeVsub** | Video | `https://animevsub.app` | v1 |
+| **Anime Hay** | Video | `https://animevietsub.gg` | v1 |
 
 ## Giấy phép
 

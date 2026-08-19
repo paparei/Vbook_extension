@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "name": "Anime Hay",
+    "author": "kychi",
+    "version": 1,
+    "source": "https://animevietsub.gg",
+    "regexp": "(www\\.)?(animehay\\.fm|animevietsub\\.gg)/.*",
+    "description": "Xem Anime Hay - miễn phí chất lượng cao với phụ đề Tiếng Việt, Thuyết Minh, Lồng Tiếng. Website có hơn +10.000 phim Anime mới nhất và cập nhật liên tục, kho phim đa dạng từ các thể loại 3D Trung Quốc, Anime Nhật Bản.. (animehay.fm đã chuyển sang animevietsub.gg) \n\n Lưu Ý: Không search được do web không search được",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "video"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js",
+    "track": "track.js"
+  }
+}

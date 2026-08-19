@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "name": "AnimeVsub",
+    "author": "kychi",
+    "version": 1,
+    "source": "https://animevsub.app",
+    "regexp": "(www\\.)?animevsub\\.app/.*",
+    "description": "Xem anime Vietsub HD miễn phí trên AnimeVsub - kho anime lớn nhất",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "video"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js",
+    "track": "track.js"
+  }
+}
