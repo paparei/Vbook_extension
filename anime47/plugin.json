@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Anime47",
     "author": "paparei",
-    "version": 16,
+    "version": 17,
     "source": "https://anime47.best",
     "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem)/.*",
     "description": "Xem anime vietsub online tại Anime47 (cần tài khoản để xem)",

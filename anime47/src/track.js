@@ -22,29 +22,26 @@ function execute(data) {
     };
 
     // Subtitle contract: { data, type, label, language } with data AS A URL -
-    // the player drops data: URIs (no CC button, v15). The VTTs sit behind the
-    // same Referer gate as segments, so mirror audios[] and attach per-track
-    // headers to each subtitle entry (undocumented, harmless if ignored).
-    // ponytail: if the app ignores per-subtitle headers the VTT 403s and CC is
-    // lost again. Upgrade: proxy the VTT through a public URL if that proves true.
+    // the player drops data: URIs (no CC button, v15). anime47.love serves the
+    // VTTs from signed URLs (?expires&signature) open to any UA/referer, so the
+    // player can fetch them bare; no per-entry headers needed (and the player
+    // may not honor them anyway).
+    // ponytail: provider may stop signing/serving subs on anime47.love and move
+    // them behind the CDN Referer gate again. Upgrade: pre-download to a data URL
+    // only if that happens (but then CC disappears - see v15).
     var subtitles = [];
-    var defaultData = '';
-    for (var s = 0; s < rawSubs.length; s++) {
-        var sub = rawSubs[s];
+    for (var si = 0; si < rawSubs.length; si++) {
+        var sub = rawSubs[si];
         if (!sub || !sub.file) continue;
         var file = sub.file + '';
         var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
-        var entry = {
+        subtitles.push({
             data: file,
             type: 'vtt',
-            label: (sub.label || ('Sub ' + (s + 1))) + '',
-            language: lang ? lang[1] : '',
-            headers: headers
-        };
-        subtitles.push(entry);
-        if (sub['default']) defaultData = entry.data;
+            label: (sub.label || ('Sub ' + (subtitles.length + 1))) + '',
+            language: lang ? lang[1] : ''
+        });
     }
-    if (!defaultData && subtitles.length) defaultData = subtitles[0].data;
 
     function native(url) {
         return Response.success({
@@ -54,9 +51,7 @@ function execute(data) {
             headers: headers,
             host: BASE_URL,
             timeSkip: [],
-            subtitles: subtitles,
-            subtitle: defaultData,
-            subtitleType: 'vtt'
+            subtitles: subtitles
         });
     }
 
@@ -102,8 +97,6 @@ function execute(data) {
         headers: headers,
         host: BASE_URL,
         timeSkip: [],
-        subtitles: subtitles,
-        subtitle: defaultData,
-        subtitleType: 'vtt'
+        subtitles: subtitles
     });
 }
