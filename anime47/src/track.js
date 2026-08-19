@@ -23,10 +23,12 @@ function resolveVariant(masterUrl, headers) {
 function execute(data) {
     var streamUrl = '';
     var kind = '';
+    var rawSubs = [];
     try {
         var obj = JSON.parse(data);
         streamUrl = obj.url || '';
         kind = obj.type || '';
+        rawSubs = obj.subs || [];
     } catch (e) {
         streamUrl = (data || '') + '';
     }
@@ -39,35 +41,43 @@ function execute(data) {
         'Origin': BASE_URL
     };
 
-    if (streamUrl.indexOf('.mp4') !== -1 || streamUrl.indexOf('.m3u8') !== -1) {
+    // subtitles from the episode API: {file, label, default}
+    var subtitles = [];
+    for (var s = 0; s < rawSubs.length; s++) {
+        var sub = rawSubs[s];
+        if (!sub || !sub.file) continue;
+        var file = sub.file + '';
+        var lang = file.match(/\.([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+        subtitles.push({
+            data: file,
+            type: 'vtt',
+            label: (sub.label || ('Sub ' + (s + 1))) + '',
+            language: lang ? lang[1] : ''
+        });
+    }
+
+    function native(url) {
         return Response.success({
-            data: streamUrl,
+            data: url,
             type: 'native',
             headers: headers,
             host: BASE_URL,
-            timeSkip: []
+            timeSkip: [],
+            subtitles: subtitles
         });
+    }
+
+    if (streamUrl.indexOf('.mp4') !== -1 || streamUrl.indexOf('.m3u8') !== -1) {
+        return native(streamUrl);
     }
 
     if (kind !== 'page') {
         var variant = resolveVariant(streamUrl, headers);
         if (variant) {
-            return Response.success({
-                data: variant + '.m3u8',
-                type: 'native',
-                headers: headers,
-                host: BASE_URL,
-                timeSkip: []
-            });
+            return native(variant + '.m3u8');
         }
         if (kind === 'hls' || kind === 'jwplayer') {
-            return Response.success({
-                data: streamUrl + (streamUrl.indexOf('?') === -1 ? '?' : '&') + 'f=.m3u8',
-                type: 'native',
-                headers: headers,
-                host: BASE_URL,
-                timeSkip: []
-            });
+            return native(streamUrl + (streamUrl.indexOf('?') === -1 ? '?' : '&') + 'f=.m3u8');
         }
     }
 

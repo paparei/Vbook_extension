@@ -22,7 +22,7 @@ function execute(url) {
         var title = (s.server_name || s.label || s.provider || s.quality || ('Server ' + (i + 1))) + '';
         tracks.push({
             title: title,
-            data: JSON.stringify({ url: s.url + '', type: (s.player_type || 'hls') + '' })
+            data: JSON.stringify({ url: s.url + '', type: (s.player_type || 'hls') + '', subs: s.subtitles || [] })
         });
     }
 
