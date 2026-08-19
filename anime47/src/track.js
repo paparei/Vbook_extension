@@ -57,12 +57,39 @@ function execute(data) {
         });
     }
 
-    // jwplayer/hls masters from vlogphim serve #EXTM3U directly (no suffix needed).
-    // Pass the master itself, exactly like the website's player does: the player
-    // re-fetches it on playlist reloads, so signed variant/segment URLs stay fresh.
-    // ponytail: if some future server returns a non-HLS URL here, it falls to 'auto'.
-    if (kind !== 'page') {
+    // vlogphim master URLs have no extension, so VBook's native player can't identify
+    // them as HLS and rejects them. The master accepts no .m3u8 suffix (500), but the
+    // first variant playlist does. Fetch the master, take the variant, append ".m3u8".
+    // ponytail: pick variant by bandwidth if multi-quality masters appear.
+    function resolveVariant(masterUrl) {
+        try {
+            var res = fetch(masterUrl, { method: 'GET', headers: headers, timeout: 15000 });
+            var text = res && res.text ? (res.text() || '') : '';
+            if (text.indexOf('#EXTM3U') === -1) return '';
+            var origin = masterUrl.match(/^https?:\/\/[^\/]+/);
+            var lines = text.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                var line = (lines[i] + '').replace(/\s+$/, '');
+                if (!line || line.charAt(0) === '#') continue;
+                if (line.indexOf('http://') === 0 || line.indexOf('https://') === 0) return line;
+                return (origin ? origin[0] : '') + (line.charAt(0) === '/' ? line : '/' + line);
+            }
+        } catch (e) { }
+        return '';
+    }
+
+    if (streamUrl.indexOf('.mp4') !== -1 || streamUrl.indexOf('.m3u8') !== -1) {
         return native(streamUrl);
+    }
+
+    if (kind !== 'page') {
+        var variant = resolveVariant(streamUrl);
+        if (variant) {
+            return native(variant + '.m3u8');
+        }
+        if (kind === 'hls' || kind === 'jwplayer') {
+            return native(streamUrl + (streamUrl.indexOf('?') === -1 ? '?' : '&') + 'f=.m3u8');
+        }
     }
 
     // Embed/unknown -> let VBook WebView sniff the media
