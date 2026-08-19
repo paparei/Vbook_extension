@@ -43,6 +43,7 @@ function execute(data) {
 
     // subtitles from the episode API: {file, label, default}
     var subtitles = [];
+    var legacySub = '';
     for (var s = 0; s < rawSubs.length; s++) {
         var sub = rawSubs[s];
         if (!sub || !sub.file) continue;
@@ -54,16 +55,21 @@ function execute(data) {
             label: (sub.label || ('Sub ' + (s + 1))) + '',
             language: lang ? lang[1] : ''
         });
+        // legacy single-subtitle fields for older VBook builds (default track wins)
+        if (!legacySub || sub['default']) legacySub = file;
     }
 
     function native(url) {
         return Response.success({
             data: url,
             type: 'native',
+            mimeType: 'application/x-mpegURL',
             headers: headers,
             host: BASE_URL,
             timeSkip: [],
-            subtitles: subtitles
+            subtitles: subtitles,
+            subtitle: legacySub,
+            subtitleType: 'vtt'
         });
     }
 
