@@ -21,8 +21,14 @@ function execute(data) {
         'Origin': BASE_URL
     };
 
-    // subtitles from the episode API: {file, label, default}
-    // default track goes first so the player auto-selects it
+    // VTT subtitle files sit behind the same Referer gate as the segments, but
+    // the track contract gives the player a bare URL for subtitles (no headers).
+    // VBook fetches those URLs with its own loader, no Referer -> CDN 403s ->
+    // player aborts with "could not load this server" ~3s in. Pre-download each
+    // VTT through the extension (which CAN send headers) and hand back local
+    // content instead of the gated URL.
+    // ponytail: assumes subtitle size is small (subs are KBs); multi-MB cap not
+    // enforced. Upgrade: stream to storage if VBook adds a data-URL size limit.
     var subtitles = [];
     var legacySub = '';
     for (var pass = 0; pass < 2; pass++) {
@@ -32,14 +38,19 @@ function execute(data) {
             var isDef = sub['default'] ? true : false;
             if ((pass === 0) !== isDef) continue;
             var file = sub.file + '';
-            var lang = file.match(/\.([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+            var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+            var vtt = '';
+            try {
+                var subRes = fetch(file, { method: 'GET', headers: headers, timeout: 15000 });
+                if (subRes && subRes.text) vtt = (subRes.text() || '');
+            } catch (e) { vtt = ''; }
             subtitles.push({
-                data: file,
+                data: vtt ? ('data:text/vtt;base64,' + Base64.encode(vtt)) : file,
                 type: 'vtt',
                 label: (sub.label || ('Sub ' + (s + 1))) + '',
                 language: lang ? lang[1] : ''
             });
-            if (isDef || !legacySub) legacySub = file;
+            if (isDef || !legacySub) legacySub = subtitles[subtitles.length - 1].data;
         }
     }
 
