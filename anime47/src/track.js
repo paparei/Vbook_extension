@@ -31,26 +31,41 @@ function execute(data) {
     // enforced. Upgrade: stream to storage if VBook adds a data-URL size limit.
     var subtitles = [];
     var legacySub = '';
-    for (var pass = 0; pass < 2; pass++) {
-        for (var s = 0; s < rawSubs.length; s++) {
-            var sub = rawSubs[s];
-            if (!sub || !sub.file) continue;
-            var isDef = sub['default'] ? true : false;
-            if ((pass === 0) !== isDef) continue;
-            var file = sub.file + '';
-            var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
-            var vtt = '';
-            try {
-                var subRes = fetch(file, { method: 'GET', headers: headers, timeout: 15000 });
-                if (subRes && subRes.text) vtt = (subRes.text() || '');
-            } catch (e) { vtt = ''; }
+    try {
+        for (var pass = 0; pass < 2; pass++) {
+            for (var s = 0; s < rawSubs.length; s++) {
+                var sub = rawSubs[s];
+                if (!sub || !sub.file) continue;
+                var isDef = sub['default'] ? true : false;
+                if ((pass === 0) !== isDef) continue;
+                var file = sub.file + '';
+                var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+                var vtt = '';
+                try {
+                    var subRes = fetch(file, { method: 'GET', headers: headers, timeout: 15000 });
+                    if (subRes && subRes.text) vtt = (subRes.text() || '');
+                } catch (e) { vtt = ''; }
+                // stdlib encodeURIComponent only - no reliance on a crypto global,
+                // and the whole block is guarded so subtitle problems never kill plays
+                subtitles.push({
+                    data: vtt ? ('data:text/vtt;charset=utf-8,' + encodeURIComponent(vtt)) : file,
+                    type: 'vtt',
+                    label: (sub.label || ('Sub ' + (s + 1))) + '',
+                    language: lang ? lang[1] : ''
+                });
+                if (isDef || !legacySub) legacySub = subtitles[subtitles.length - 1].data;
+            }
+        }
+    } catch (e) {
+        // worst case: fall back to plain URLs (v13 behavior) instead of failing
+        for (var s2 = 0; s2 < rawSubs.length; s2++) {
+            var fallback = rawSubs[s2];
+            if (!fallback || !fallback.file) continue;
             subtitles.push({
-                data: vtt ? ('data:text/vtt;base64,' + Base64.encode(vtt)) : file,
+                data: fallback.file + '',
                 type: 'vtt',
-                label: (sub.label || ('Sub ' + (s + 1))) + '',
-                language: lang ? lang[1] : ''
+                label: (fallback.label || ('Sub ' + (s2 + 1))) + ''
             });
-            if (isDef || !legacySub) legacySub = subtitles[subtitles.length - 1].data;
         }
     }
 
