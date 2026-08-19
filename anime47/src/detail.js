@@ -48,7 +48,9 @@ function execute(url) {
 
     var status = (d.status || '') + '';
     var ongoing = status.toLowerCase().indexOf('ongoing') !== -1 || d.airing === true;
-    var epInfo = d.current_episode ? ('Tập ' + d.current_episode) : (d.episodes ? (d.episodes + ' tập') : '');
+    // API returns episodes as {total, sub, dub}
+    var epTotal = d.episodes && typeof d.episodes === 'object' ? d.episodes.total : d.episodes;
+    var epInfo = epTotal ? (epTotal + ' tập') : '';
 
     return Response.success({
         name: d.title + '',
