@@ -42,21 +42,25 @@ function execute(data) {
     };
 
     // subtitles from the episode API: {file, label, default}
+    // default track goes first so the player auto-selects it
     var subtitles = [];
     var legacySub = '';
-    for (var s = 0; s < rawSubs.length; s++) {
-        var sub = rawSubs[s];
-        if (!sub || !sub.file) continue;
-        var file = sub.file + '';
-        var lang = file.match(/\.([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
-        subtitles.push({
-            data: file,
-            type: 'vtt',
-            label: (sub.label || ('Sub ' + (s + 1))) + '',
-            language: lang ? lang[1] : ''
-        });
-        // legacy single-subtitle fields for older VBook builds (default track wins)
-        if (!legacySub || sub['default']) legacySub = file;
+    for (var pass = 0; pass < 2; pass++) {
+        for (var s = 0; s < rawSubs.length; s++) {
+            var sub = rawSubs[s];
+            if (!sub || !sub.file) continue;
+            var isDef = sub['default'] ? true : false;
+            if ((pass === 0) !== isDef) continue;
+            var file = sub.file + '';
+            var lang = file.match(/\.([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+            subtitles.push({
+                data: file,
+                type: 'vtt',
+                label: (sub.label || ('Sub ' + (s + 1))) + '',
+                language: lang ? lang[1] : ''
+            });
+            if (isDef || !legacySub) legacySub = file;
+        }
     }
 
     function native(url) {
