@@ -96,8 +96,8 @@ function fetchApi(url, withAuth) {
 
 function fetchJson(url, withAuth) {
     var res = fetchApi(url, withAuth);
-    if (res && res.status === 401 && withAuth !== false) {
-        // stale token: drop cache, re-login/refresh once
+    if (withAuth !== false && (!res || !res.ok)) {
+        // expired token (PRIVATE_MODE 401) or network hiccup: drop cache, re-login/refresh once
         storageSet('a47_token', '');
         res = fetchApi(url, withAuth);
     }
