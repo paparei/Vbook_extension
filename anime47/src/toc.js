@@ -18,7 +18,7 @@ function execute(url) {
             var eps = group.episodes || [];
             if (!eps.length) continue;
             if (teams.length > 1 || groups.length > 1) {
-                list.push({ name: ((teams[t].name || 'Server') + ' • ' + (group.name || ('Nhóm ' + (g + 1)))) + '', type: 'section' });
+                list.push({ name: ((teams[t].team_name || teams[t].name || 'Server') + ' • ' + (group.name || ('Nhóm ' + (g + 1)))) + '', type: 'section' });
             }
             for (var e = 0; e < eps.length; e++) {
                 var ep = eps[e];

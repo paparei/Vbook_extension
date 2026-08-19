@@ -18,21 +18,22 @@ function execute(data) {
         'Origin': BASE_URL
     };
 
-    // Direct HLS/mp4 stream -> native player
-    if (streamUrl.indexOf('.m3u8') !== -1 || streamUrl.indexOf('.mp4') !== -1 || kind === 'jwplayer' || kind === 'hls') {
-        return Response.success({
-            data: streamUrl,
-            type: 'native',
-            headers: headers,
-            host: BASE_URL,
-            timeSkip: []
-        });
+    var native = streamUrl.indexOf('.m3u8') !== -1 || streamUrl.indexOf('.mp4') !== -1 || kind === 'jwplayer' || kind === 'hls';
+
+    // ponytail: stream URLs often have no extension (pl.vlogphim.net/file/<hash>);
+    // sniff once for a HLS master playlist. Upgrade: cache per-URL verdict if probing gets slow.
+    if (!native) {
+        try {
+            var res = fetch(streamUrl, { method: 'GET', headers: headers, timeout: 15000 });
+            var text = res && res.text ? (res.text() || '') : '';
+            if (text.indexOf('#EXTM3U') !== -1) native = true;
+        } catch (e) { }
     }
 
-    // Embed/unknown -> let VBook WebView sniff the media
+    // native HLS/mp4 -> player; anything else -> WebView sniff
     return Response.success({
         data: streamUrl,
-        type: 'auto',
+        type: native ? 'native' : 'auto',
         headers: headers,
         host: BASE_URL,
         timeSkip: []
