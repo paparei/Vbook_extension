@@ -21,53 +21,30 @@ function execute(data) {
         'Origin': BASE_URL
     };
 
-    // VTT subtitle files sit behind the same Referer gate as the segments, but
-    // the track contract gives the player a bare URL for subtitles (no headers).
-    // VBook fetches those URLs with its own loader, no Referer -> CDN 403s ->
-    // player aborts with "could not load this server" ~3s in. Pre-download each
-    // VTT through the extension (which CAN send headers) and hand back local
-    // content instead of the gated URL.
-    // ponytail: assumes subtitle size is small (subs are KBs); multi-MB cap not
-    // enforced. Upgrade: stream to storage if VBook adds a data-URL size limit.
+    // Subtitle contract: { data, type, label, language } with data AS A URL -
+    // the player drops data: URIs (no CC button, v15). The VTTs sit behind the
+    // same Referer gate as segments, so mirror audios[] and attach per-track
+    // headers to each subtitle entry (undocumented, harmless if ignored).
+    // ponytail: if the app ignores per-subtitle headers the VTT 403s and CC is
+    // lost again. Upgrade: proxy the VTT through a public URL if that proves true.
     var subtitles = [];
-    var legacySub = '';
-    try {
-        for (var pass = 0; pass < 2; pass++) {
-            for (var s = 0; s < rawSubs.length; s++) {
-                var sub = rawSubs[s];
-                if (!sub || !sub.file) continue;
-                var isDef = sub['default'] ? true : false;
-                if ((pass === 0) !== isDef) continue;
-                var file = sub.file + '';
-                var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
-                var vtt = '';
-                try {
-                    var subRes = fetch(file, { method: 'GET', headers: headers, timeout: 15000 });
-                    if (subRes && subRes.text) vtt = (subRes.text() || '');
-                } catch (e) { vtt = ''; }
-                // stdlib encodeURIComponent only - no reliance on a crypto global,
-                // and the whole block is guarded so subtitle problems never kill plays
-                subtitles.push({
-                    data: vtt ? ('data:text/vtt;charset=utf-8,' + encodeURIComponent(vtt)) : file,
-                    type: 'vtt',
-                    label: (sub.label || ('Sub ' + (s + 1))) + '',
-                    language: lang ? lang[1] : ''
-                });
-                if (isDef || !legacySub) legacySub = subtitles[subtitles.length - 1].data;
-            }
-        }
-    } catch (e) {
-        // worst case: fall back to plain URLs (v13 behavior) instead of failing
-        for (var s2 = 0; s2 < rawSubs.length; s2++) {
-            var fallback = rawSubs[s2];
-            if (!fallback || !fallback.file) continue;
-            subtitles.push({
-                data: fallback.file + '',
-                type: 'vtt',
-                label: (fallback.label || ('Sub ' + (s2 + 1))) + ''
-            });
-        }
+    var defaultData = '';
+    for (var s = 0; s < rawSubs.length; s++) {
+        var sub = rawSubs[s];
+        if (!sub || !sub.file) continue;
+        var file = sub.file + '';
+        var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+        var entry = {
+            data: file,
+            type: 'vtt',
+            label: (sub.label || ('Sub ' + (s + 1))) + '',
+            language: lang ? lang[1] : '',
+            headers: headers
+        };
+        subtitles.push(entry);
+        if (sub['default']) defaultData = entry.data;
     }
+    if (!defaultData && subtitles.length) defaultData = subtitles[0].data;
 
     function native(url) {
         return Response.success({
@@ -78,7 +55,7 @@ function execute(data) {
             host: BASE_URL,
             timeSkip: [],
             subtitles: subtitles,
-            subtitle: legacySub,
+            subtitle: defaultData,
             subtitleType: 'vtt'
         });
     }
@@ -126,7 +103,7 @@ function execute(data) {
         host: BASE_URL,
         timeSkip: [],
         subtitles: subtitles,
-        subtitle: legacySub,
+        subtitle: defaultData,
         subtitleType: 'vtt'
     });
 }
