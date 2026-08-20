@@ -67,11 +67,8 @@ function execute(data) {
         return base.substring(0, base.lastIndexOf('/') + 1) + url;
     }
 
-    // vlogphim's HLS chunks are PNG followed by MPEG-TS. Give Media3 five clean TS
-    // packets (including SDT/PAT/PMT) so it selects and reuses the TS extractor even
-    // when playback starts after a seek. Only one four-byte CDN probe is needed.
-    // ponytail: assumes each wrapped chunk starts with SDT/PAT/PMT. Rewrite every
-    // chunk only if the provider changes that TS prefix.
+    // VlogPhim's master URL has no extension, but its variant accepts .m3u8.
+    // ponytail: picks the first variant; select by bandwidth if multi-quality masters appear.
     function resolveVariant(masterUrl) {
         try {
             var res = fetch(masterUrl, { method: 'GET', headers: headers, timeout: 15000 });
@@ -79,44 +76,10 @@ function execute(data) {
             var text = res.text() || '';
             if (text.indexOf('#EXTM3U') === -1) return '';
             var lines = text.split('\n');
-            var variant = '';
             for (var i = 0; i < lines.length; i++) {
                 var line = (lines[i] + '').replace(/^\s+|\s+$/g, '');
-                if (line && line.charAt(0) !== '#') {
-                    variant = absolute(line, masterUrl) + '.m3u8';
-                    break;
-                }
+                if (line && line.charAt(0) !== '#') return absolute(line, masterUrl) + '.m3u8';
             }
-            if (!variant) return '';
-
-            res = fetch(variant, { method: 'GET', headers: headers, timeout: 15000 });
-            if (!res || !res.ok || !res.text) return variant;
-            text = res.text() || '';
-            if (text.indexOf('#EXTM3U') === -1) return variant;
-            lines = text.split('\n');
-            var first = -1;
-            for (i = 0; i < lines.length; i++) {
-                line = (lines[i] + '').replace(/^\s+|\s+$/g, '');
-                if (!line || line.charAt(0) === '#') continue;
-                lines[i] = absolute(line, variant);
-                if (first === -1) first = i;
-            }
-            if (first === -1) return variant;
-            var segment = lines[first];
-            var probeHeaders = {
-                'User-Agent': UA,
-                'Referer': BASE_URL + '/',
-                'Origin': BASE_URL,
-                'Range': 'bytes=54-57'
-            };
-            var probe = fetch(segment, { method: 'GET', headers: probeHeaders, timeout: 15000 });
-            var b64 = probe && probe.ok && probe.base64 ? probe.base64() : '';
-            var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-            if (b64.length < 6) return variant;
-            var offset = (alphabet.indexOf(b64.charAt(0)) * 4 + Math.floor(alphabet.indexOf(b64.charAt(1)) / 16)) * 16777216 + ((alphabet.indexOf(b64.charAt(1)) & 15) * 16 + Math.floor(alphabet.indexOf(b64.charAt(2)) / 4)) * 65536 + ((alphabet.indexOf(b64.charAt(2)) & 3) * 64 + alphabet.indexOf(b64.charAt(3))) * 256 + alphabet.indexOf(b64.charAt(4)) * 4 + Math.floor(alphabet.indexOf(b64.charAt(5)) / 16) + 78;
-            if (!(offset > 78)) return variant;
-            lines[first] = '#EXT-X-MAP:URI="' + segment + '",BYTERANGE="940@' + offset + '"\n' + segment;
-            return 'data:application/vnd.apple.mpegurl,' + encodeURIComponent(lines.join('\n'));
         } catch (e) { }
         return '';
     }
