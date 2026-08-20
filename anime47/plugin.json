@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Anime47",
     "author": "paparei",
-    "version": 20,
+    "version": 21,
     "source": "https://anime47.best",
     "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem)/.*",
     "description": "Xem anime vietsub online tại Anime47 (cần tài khoản để xem)",
@@ -32,6 +32,12 @@
       "mode": "input",
       "format": "password",
       "default": ""
+    },
+    "a47_proxy": {
+      "title": "URL proxy phát VlogPhim ổn định",
+      "mode": "input",
+      "format": "text",
+      "default": "https://anime47-vbook-proxy.rainy-ixia.workers.dev/"
     }
   }
 }

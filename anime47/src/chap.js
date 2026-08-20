@@ -15,21 +15,6 @@ function execute(url) {
     var episode = data && data.episode ? data.episode : data;
     var streams = episode && episode.streams ? episode.streams : [];
 
-    // The site shows one CC menu aggregated from every server; subtitle files
-    // often live on a different server than the one being played, so attach
-    // the merged (deduped) list to every track.
-    var allSubs = [];
-    var seen = {};
-    for (var k = 0; k < streams.length; k++) {
-        var subs = streams[k] && streams[k].subtitles ? streams[k].subtitles : [];
-        for (var x = 0; x < subs.length; x++) {
-            var file = subs[x] && subs[x].file ? subs[x].file + '' : '';
-            if (!file || seen[file]) continue;
-            seen[file] = 1;
-            allSubs.push(subs[x]);
-        }
-    }
-
     var tracks = [];
     for (var i = 0; i < streams.length; i++) {
         var s = streams[i];
@@ -37,13 +22,23 @@ function execute(url) {
         var title = (s.server_name || s.label || s.provider || s.quality || ('Server ' + (i + 1))) + '';
         tracks.push({
             title: title,
-            data: JSON.stringify({ url: s.url + '', type: (s.player_type || 'hls') + '', subs: allSubs })
+            // Stable identity lets track.js refresh short-lived stream/subtitle URLs.
+            data: JSON.stringify({
+                episodeId: episodeId + '',
+                streamIndex: i,
+                server: title,
+                url: s.url + '',
+                type: (s.player_type || 'hls') + ''
+            })
         });
     }
 
     if (!tracks.length) {
-        // Fallback: let the app sniff the stream from the watch page itself
-        tracks.push({ title: 'Mặc định', data: JSON.stringify({ url: url, type: 'page', subs: allSubs }) });
+        // Fallback: let the app sniff the stream from the watch page itself.
+        tracks.push({
+            title: 'Mặc định',
+            data: JSON.stringify({ episodeId: episodeId + '', streamIndex: -1, url: url, type: 'page' })
+        });
     }
     return Response.success(tracks);
 }

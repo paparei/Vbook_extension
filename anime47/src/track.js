@@ -1,46 +1,97 @@
 load('config.js');
 
 function execute(data) {
+    var obj = {};
     var streamUrl = '';
     var kind = '';
     var rawSubs = [];
     try {
-        var obj = JSON.parse(data);
+        obj = JSON.parse(data);
         streamUrl = obj.url || '';
         kind = obj.type || '';
-        rawSubs = obj.subs || [];
+        rawSubs = obj.subs || []; // legacy handles created before v21
     } catch (e) {
         streamUrl = (data || '') + '';
     }
+
+    function titleOf(stream, index) {
+        return (stream.server_name || stream.label || stream.provider || stream.quality || ('Server ' + (index + 1))) + '';
+    }
+
+    // Chapter results may be cached longer than Anime47's signed VTT URLs. Resolve
+    // the stable episode/server handle again immediately before playback.
+    if (obj.episodeId) {
+        var fresh = fetchJson(API_URL + '/anime/watch/episode/' + obj.episodeId, true);
+        var freshData = fresh ? (fresh.data || fresh) : null;
+        var episode = freshData && freshData.episode ? freshData.episode : freshData;
+        var streams = episode && episode.streams ? episode.streams : [];
+        var selected = null;
+        var index = parseInt(obj.streamIndex, 10);
+        if (index >= 0 && index < streams.length) selected = streams[index];
+        if (obj.server && (!selected || titleOf(selected, index) !== obj.server)) {
+            for (var sm = 0; sm < streams.length; sm++) {
+                if (titleOf(streams[sm], sm) === obj.server) {
+                    selected = streams[sm];
+                    break;
+                }
+            }
+        }
+        if (selected && selected.url) {
+            streamUrl = selected.url + '';
+            kind = (selected.player_type || 'hls') + '';
+        }
+
+        rawSubs = [];
+        var seenRaw = {};
+        for (var st = 0; st < streams.length; st++) {
+            var serverSubs = streams[st] && streams[st].subtitles ? streams[st].subtitles : [];
+            for (var rs = 0; rs < serverSubs.length; rs++) {
+                var rawFile = serverSubs[rs] && serverSubs[rs].file ? serverSubs[rs].file + '' : '';
+                if (!rawFile || seenRaw[rawFile]) continue;
+                seenRaw[rawFile] = 1;
+                rawSubs.push(serverSubs[rs]);
+            }
+        }
+    }
     if (!streamUrl) return Response.error('Không có luồng phát');
 
-    // segments on cdn*.nonprofit.asia require this Referer
+    // Direct VlogPhim segments require these headers. A configured proxy applies
+    // them upstream and harmlessly ignores them from the player.
     var headers = {
         'User-Agent': UA,
         'Referer': BASE_URL + '/',
         'Origin': BASE_URL
     };
 
-    // Subtitle contract: { data, type, label, language } with data AS A URL -
-    // the player drops data: URIs (no CC button, v15). anime47.love serves the
-    // VTTs from signed URLs (?expires&signature) open to any UA/referer, so the
-    // player can fetch them bare; no per-entry headers needed (and the player
-    // may not honor them anyway).
-    // ponytail: provider may stop signing/serving subs on anime47.love and move
-    // them behind the CDN Referer gate again. Upgrade: pre-download to a data URL
-    // only if that happens (but then CC disappears - see v15).
+    function subLanguage(sub) {
+        var file = (sub.file || '') + '';
+        var match = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+        return match ? match[1].toLowerCase() : '';
+    }
+
+    function subPriority(sub) {
+        var label = ((sub && sub.label) || '').toLowerCase();
+        if (subLanguage(sub) === 'vi' || label.indexOf('việt') !== -1 || label.indexOf('viet') !== -1) return 0;
+        return sub && sub['default'] ? 1 : 2;
+    }
+
+    // Keep URL-based entries: VBook drops data: subtitle URIs. Vietnamese is
+    // first even when Anime47 incorrectly marks English as the default track.
     var subtitles = [];
-    for (var pass = 0; pass < 2; pass++) {
+    var seenSubs = {};
+    for (var pass = 0; pass < 3; pass++) {
         for (var si = 0; si < rawSubs.length; si++) {
             var sub = rawSubs[si];
-            if (!sub || !sub.file || (!!sub['default']) !== (pass === 0)) continue;
+            if (!sub || !sub.file || subPriority(sub) !== pass) continue;
             var file = sub.file + '';
-            var lang = file.match(/[\/._-]([a-z]{2}(?:-[a-z0-9]+)?)\.vtt/i);
+            if (seenSubs[file]) continue;
+            seenSubs[file] = 1;
+            var language = subLanguage(sub);
             subtitles.push({
                 data: file,
                 type: 'vtt',
                 label: (sub.label || ('Sub ' + (subtitles.length + 1))) + '',
-                language: lang ? lang[1] : ''
+                language: language
             });
         }
     }
@@ -67,8 +118,19 @@ function execute(data) {
         return base.substring(0, base.lastIndexOf('/') + 1) + url;
     }
 
+    function isVlogPhim(url) {
+        return /^https:\/\/pl\.vlogphim\.net\//i.test(url);
+    }
+
+    function proxyTarget(url) {
+        var proxy = configText('a47_proxy');
+        if (!/^https:\/\//i.test(proxy)) return '';
+        return proxy + (proxy.indexOf('?') === -1 ? '?' : '&') + 'url=' + encodeURIComponent(url);
+    }
+
     // VlogPhim's master URL has no extension, but its variant accepts .m3u8.
-    // ponytail: picks the first variant; select by bandwidth if multi-quality masters appear.
+    // ponytail: direct fallback still relies on Media3 parsing PNG-wrapped TS;
+    // deploy/configure proxy-worker.mjs to remove that ceiling.
     function resolveVariant(masterUrl) {
         try {
             var res = fetch(masterUrl, { method: 'GET', headers: headers, timeout: 15000 });
@@ -84,9 +146,12 @@ function execute(data) {
         return '';
     }
 
-    if (streamUrl.indexOf('.mp4') !== -1 || streamUrl.indexOf('.m3u8') !== -1) {
-        return native(streamUrl);
+    if (isVlogPhim(streamUrl)) {
+        var proxied = proxyTarget(streamUrl);
+        if (proxied) return native(proxied);
     }
+
+    if (streamUrl.indexOf('.mp4') !== -1 || streamUrl.indexOf('.m3u8') !== -1) return native(streamUrl);
 
     if (kind !== 'page') {
         var variant = resolveVariant(streamUrl);
@@ -96,13 +161,15 @@ function execute(data) {
         }
     }
 
-    // Embed/unknown -> let VBook WebView sniff the media
+    // Embed/unknown -> let VBook WebView sniff the media.
     return Response.success({
         data: streamUrl,
         type: 'auto',
         headers: headers,
         host: BASE_URL,
         timeSkip: [],
-        subtitles: subtitles
+        subtitles: subtitles,
+        subtitle: legacySub,
+        subtitleType: 'vtt'
     });
 }
