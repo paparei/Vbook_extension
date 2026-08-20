@@ -38,6 +38,7 @@ function execute(url) {
         if (!posterEl) posterEl = doc.select('.rounded-lg img').first();
         if (posterEl) cover = posterEl.attr('src') || '';
     }
+    cover = normalizeAssetUrl(cover);
 
     // === Description ===
     var description = '';

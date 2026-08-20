@@ -29,13 +29,12 @@ function execute(url, page) {
         var link = normalizeUrl(item.attr('href'));
         if (!link) return;
 
-        // Extract cover image
         var imgEl = item.select('img').first();
         var cover = '';
         if (imgEl) {
             cover = imgEl.attr('src') || imgEl.attr('data-src') || imgEl.attr('data-lazy-src') || '';
         }
-        cover = normalizeUrl(cover);
+        cover = normalizeAssetUrl(cover);
 
         // Intelligently parse badge texts from spans and divs
         var tag = '';

@@ -34,6 +34,14 @@ function normalizeUrl(url) {
     return BASE_URL + url;
 }
 
+function normalizeAssetUrl(url) {
+    if (!url) return '';
+    url = String(url);
+    if (url.indexOf('//') === 0) return 'https:' + url;
+    if (/^https?:\/\//i.test(url)) return url;
+    return BASE_URL + (url.indexOf('/') === 0 ? url : '/' + url);
+}
+
 function cleanText(text) {
     if (!text) return '';
     return String(text).replace(/\s+/g, ' ').trim();
