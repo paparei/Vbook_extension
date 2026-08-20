@@ -64,6 +64,7 @@ function execute(url) {
         ongoing: ongoing,
         tags: tags,
         genres: [],
-        suggests: []
+        suggests: [],
+        comments: [{ title: 'Bình luận', input: id, script: 'comments.js' }]
     });
 }
