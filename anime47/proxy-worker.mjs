@@ -26,8 +26,10 @@ async function upstream(url) {
 }
 
 function proxyUrl(target, requestUrl) {
+  const source = new URL(target);
   const url = new URL(requestUrl);
-  url.searchParams.set("url", target);
+  url.pathname = /^cdn\d+\.nonprofit\.asia$/.test(source.hostname) ? "/segment.ts" : "/playlist.m3u8";
+  url.searchParams.set("url", source.href);
   return url.href;
 }
 

@@ -125,7 +125,10 @@ function execute(data) {
     function proxyTarget(url) {
         var proxy = configText('a47_proxy');
         if (!/^https:\/\//i.test(proxy)) return '';
-        return proxy + (proxy.indexOf('?') === -1 ? '?' : '&') + 'url=' + encodeURIComponent(url);
+        var queryAt = proxy.indexOf('?');
+        var query = queryAt === -1 ? '' : proxy.substring(queryAt);
+        proxy = (queryAt === -1 ? proxy : proxy.substring(0, queryAt)).replace(/\/+$/, '');
+        return proxy + '/playlist.m3u8' + query + (query ? '&' : '?') + 'url=' + encodeURIComponent(url);
     }
 
     // VlogPhim's master URL has no extension, but its variant accepts .m3u8.
@@ -147,7 +150,10 @@ function execute(data) {
     }
 
     if (isVlogPhim(streamUrl)) {
-        var proxied = proxyTarget(streamUrl);
+        // VBook aborts extensionless proxy masters before loading their child
+        // rendition. Return one explicit media-playlist URL instead.
+        var vlogVariant = resolveVariant(streamUrl);
+        var proxied = proxyTarget(vlogVariant || streamUrl);
         if (proxied) return native(proxied);
     }
 
