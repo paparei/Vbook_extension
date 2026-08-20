@@ -16,9 +16,23 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 
 | Tên Extension | Loại | Nguồn | Phiên bản |
 | ------------- | ---- | ----- | --------- |
-| **Anime47** | Video | `https://anime47.best` | v1 |
+| **Anime47** | Video | `https://anime47.best` | v23 |
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
+
+## Anime47: tạo proxy riêng
+
+Luồng VlogPhim cần Cloudflare Worker để phát ổn định. Mỗi người dùng tự tạo Worker miễn phí:
+
+1. Mở **Cloudflare Dashboard → Workers & Pages → Create → Worker**.
+2. Chọn **Edit code**, thay toàn bộ mã bằng [`anime47/proxy-worker.mjs`](anime47/proxy-worker.mjs), rồi **Deploy**.
+3. Khuyến nghị: vào **Settings → Variables and Secrets**, thêm secret `PROXY_KEY` với một giá trị ngẫu nhiên dài. Không đăng giá trị này lên GitHub.
+4. Sao chép URL `workers.dev`. Trong cài đặt extension Anime47 của vBook, nhập:
+   - Không dùng secret: `https://ten-worker.tai-khoan.workers.dev/`
+   - Có secret: `https://ten-worker.tai-khoan.workers.dev/?key=GIA_TRI_BI_MAT`
+5. Bật thông báo mức sử dụng/giới hạn chi phí trong Cloudflare và chỉ chia sẻ URL nếu chấp nhận dùng chung hạn mức.
+
+Worker chỉ cho phép máy chủ phát của VlogPhim, nhưng chủ tài khoản vẫn chịu trách nhiệm về lưu lượng và điều khoản sử dụng Cloudflare/nguồn video.
 
 ## Giấy phép
 

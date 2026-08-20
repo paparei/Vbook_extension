@@ -123,7 +123,7 @@ function execute(data) {
     }
 
     function proxyTarget(url) {
-        var proxy = configText('a47_proxy');
+        var proxy = configText('a47_proxy_url');
         if (!/^https:\/\//i.test(proxy)) return '';
         var queryAt = proxy.indexOf('?');
         var query = queryAt === -1 ? '' : proxy.substring(queryAt);
@@ -150,6 +150,9 @@ function execute(data) {
     }
 
     if (isVlogPhim(streamUrl)) {
+        if (!/^https:\/\//i.test(configText('a47_proxy_url'))) {
+            return Response.error('Hãy cấu hình URL proxy riêng trong cài đặt Anime47');
+        }
         // VBook aborts extensionless proxy masters before loading their child
         // rendition. Return one explicit media-playlist URL instead.
         var vlogVariant = resolveVariant(streamUrl);
