@@ -21,6 +21,7 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
 | **BatCave** | Comic | `https://batcave.biz` | v2 |
+| **OpenAI Compatible Translate** | Translate | `https://ai.lts.asia/v1` | v1 |
 
 MangaDex mặc định ưu tiên chương tiếng Việt rồi tiếng Anh. Có thể đổi danh sách mã ngôn ngữ (phân tách bằng dấu phẩy, ví dụ `vi,en`) trong cài đặt extension.
 

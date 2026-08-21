@@ -63,6 +63,18 @@
       "description": "Read English comics from BatCave. Open Source page and sign in if authentication is required.",
       "type": "comic",
       "locale": "en_US"
+    },
+    {
+      "name": "OpenAI Compatible Translate",
+      "author": "paparei",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/plugin.json",
+      "version": 1,
+      "source": "https://ai.lts.asia/v1",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/icon.png",
+      "description": "Translate through 9router's OpenAI-compatible API. Configure your API key and exact 9router model; the endpoint defaults to https://ai.lts.asia/v1.",
+      "type": "translate",
+      "locale": "global"
     }
   ]
 }

@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "name": "OpenAI Compatible Translate",
+    "author": "paparei",
+    "version": 1,
+    "source": "https://ai.lts.asia/v1",
+    "description": "Translate through 9router's OpenAI-compatible API. Configure your API key and exact 9router model; the endpoint defaults to https://ai.lts.asia/v1.",
+    "type": "translate",
+    "encrypt": false
+  },
+  "script": {
+    "language": "language.js",
+    "translate": "translate.js"
+  },
+  "config": {
+    "support_auto_detect": true,
+    "max_length": 20000,
+    "max_line": 5000,
+    "required_api_key": true,
+    "support_url": "https://ai.lts.asia/v1",
+    "api_url": {
+      "title": "Chat Completions URL",
+      "subtitle": "Your 9router base URL. Use https://ai.lts.asia/v1 or another OpenAI-compatible base ending in /v1.",
+      "mode": "input",
+      "format": "text",
+      "default": "https://ai.lts.asia/v1"
+    },
+    "api_key": {
+      "title": "9router API key",
+      "subtitle": "Required by https://ai.lts.asia and sent only as Authorization: Bearer.",
+      "mode": "input",
+      "format": "text"
+    },
+    "model": {
+      "title": "Model",
+      "subtitle": "Required: use the exact model name exposed by your 9router.",
+      "mode": "input",
+      "format": "text"
+    },
+    "temperature": {
+      "title": "Temperature (0 - 2)",
+      "mode": "input",
+      "format": "number",
+      "default": 0.2
+    },
+    "timeout": {
+      "title": "Request timeout (milliseconds)",
+      "mode": "input",
+      "format": "number",
+      "default": 60000
+    },
+    "glossary": {
+      "title": "Names and terminology glossary",
+      "subtitle": "Optional, one preferred translation per line, for example 张三 = Trương Tam.",
+      "mode": "input",
+      "format": "text"
+    },
+    "system_prompt": {
+      "title": "Extra translation instructions",
+      "subtitle": "Optional instructions appended to the default translation rules.",
+      "mode": "input",
+      "format": "text"
+    }
+  }
+}
