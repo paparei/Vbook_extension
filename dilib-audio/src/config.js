@@ -89,8 +89,8 @@ function isAudioUrl(url) {
 
 function categoryPageUrl(input, page) {
     var url = normalizePageUrl(input || AUDIO_ROOT);
-    if (!/^https?:\/\/dilib\.vn\/(?:sach-noi|radio)\//i.test(url)) return '';
-    url = url.replace(/[?#].*$/, '').replace(/page\/\d+\/?$/i, '').replace(/\/+$/, '/');
+    if (!/^https?:\/\/dilib\.vn\/(?:sach-noi|radio)(?:\/|$)/i.test(url)) return '';
+    url = url.replace(/[?#].*$/, '').replace(/page\/\d+\/?$/i, '').replace(/\/+$/, '') + '/';
     var current = pageNumber(page);
     return current > 1 ? url + 'page/' + current : url;
 }

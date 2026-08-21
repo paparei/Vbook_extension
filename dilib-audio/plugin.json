@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Dilib Sách Nói & Radio",
     "author": "paparei",
-    "version": 1,
+    "version": 2,
     "source": "https://dilib.vn",
     "regexp": "https?://dilib\\.vn/(?:sach-noi|radio)(?:/[^?#]*)?(?:[?#].*)?",
     "description": "Nghe sách nói và radio tiếng Việt trên Dilib qua trình phát media VBook.",

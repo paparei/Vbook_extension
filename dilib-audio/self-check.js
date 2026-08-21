@@ -47,7 +47,7 @@ function run(name) {
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
 assert.strictEqual(manifest.metadata.type, 'video');
-assert.strictEqual(manifest.metadata.version, 1);
+assert.strictEqual(manifest.metadata.version, 2);
 ['home', 'genre', 'gen', 'detail', 'search', 'toc', 'track'].forEach(function (name) {
     assert.ok(manifest.script[name], 'missing script: ' + name);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])), 'missing file: ' + manifest.script[name]);
@@ -80,6 +80,23 @@ assert.deepStrictEqual(result.data[0], {
     cover: 'https://dilib.vn/img/news/2023/08/thumb/14531.webp',
     description: 'Radio: 89:04:19',
     host: 'https://dilib.vn'
+});
+
+fixture = {
+    status: 200,
+    html: '<a class="woocommerce-LoopProduct-link" href="/tien-nghich-14531.html"><img src="/img/news/2023/08/thumb/14531.webp" alt="Tiên Nghịch"></a>'
+};
+[
+    ['https://dilib.vn/sach-noi', 'https://dilib.vn/sach-noi/'],
+    ['/sach-noi/', 'https://dilib.vn/sach-noi/'],
+    ['sach-noi', 'https://dilib.vn/sach-noi/'],
+    ['https://dilib.vn/radio', 'https://dilib.vn/radio/'],
+    ['radio/radio-truyen-dai-ky', 'https://dilib.vn/radio/radio-truyen-dai-ky/'],
+    ['https://dilib.vn/sach-noi/page/2', 'https://dilib.vn/sach-noi/page/2']
+].forEach(function (test) {
+    requests = [];
+    assert.strictEqual(run('gen.js')(test[0], test[0].indexOf('page/2') >= 0 ? '2' : '1').ok, true);
+    assert.strictEqual(requests[0].url, test[1]);
 });
 
 fixture = {

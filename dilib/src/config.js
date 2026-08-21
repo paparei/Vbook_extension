@@ -88,8 +88,8 @@ function isChapterUrl(url) {
 
 function categoryPageUrl(input, page) {
     var url = normalizePageUrl(input || COMIC_ROOT);
-    if (!/^https?:\/\/dilib\.vn\/truyen-tranh\//i.test(url)) return '';
-    url = url.replace(/[?#].*$/, '').replace(/page\/\d+\/?$/i, '').replace(/\/+$/, '/') ;
+    if (!/^https?:\/\/dilib\.vn\/truyen-tranh(?:\/|$)/i.test(url)) return '';
+    url = url.replace(/[?#].*$/, '').replace(/page\/\d+\/?$/i, '').replace(/\/+$/, '') + '/';
     var current = pageNumber(page);
     return current > 1 ? url + 'page/' + current : url;
 }

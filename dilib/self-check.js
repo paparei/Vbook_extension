@@ -47,7 +47,7 @@ function run(name) {
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
 assert.strictEqual(manifest.metadata.type, 'comic');
-assert.strictEqual(manifest.metadata.version, 1);
+assert.strictEqual(manifest.metadata.version, 2);
 ['home', 'genre', 'gen', 'detail', 'search', 'toc', 'page'].forEach(function (name) {
     assert.ok(manifest.script[name], 'missing script: ' + name);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])), 'missing file: ' + manifest.script[name]);
@@ -79,6 +79,22 @@ assert.deepStrictEqual(result.data[0], {
     cover: 'https://dilib.vn/img/news/2024/05/thumb/14728.webp',
     description: '1195 Chap',
     host: 'https://dilib.vn'
+});
+
+fixture = {
+    status: 200,
+    html: '<a class="woocommerce-LoopProduct-link" href="/one-piece-14728.html"><img src="/img/news/2024/05/thumb/14728.webp" alt="One Piece"></a>'
+};
+[
+    ['https://dilib.vn/truyen-tranh', 'https://dilib.vn/truyen-tranh/'],
+    ['/truyen-tranh/', 'https://dilib.vn/truyen-tranh/'],
+    ['truyen-tranh/manga', 'https://dilib.vn/truyen-tranh/manga/'],
+    ['https://dilib.vn/truyen-tranh/manga', 'https://dilib.vn/truyen-tranh/manga/'],
+    ['https://dilib.vn/truyen-tranh/manga/page/2', 'https://dilib.vn/truyen-tranh/manga/page/2']
+].forEach(function (test) {
+    requests = [];
+    assert.strictEqual(run('gen.js')(test[0], test[0].indexOf('page/2') >= 0 ? '2' : '1').ok, true);
+    assert.strictEqual(requests[0].url, test[1]);
 });
 
 fixture = {
