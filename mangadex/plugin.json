@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "name": "MangaDex",
+    "author": "paparei",
+    "version": 2,
+    "source": "https://mangadex.org",
+    "regexp": "https?://(www\\.)?mangadex\\.org/(title|chapter)/[0-9a-fA-F-]{36}.*",
+    "description": "Đọc manga đa ngôn ngữ trên MangaDex",
+    "locale": "global",
+    "language": "javascript",
+    "type": "comic"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "md_languages": {
+      "title": "Ngôn ngữ chương, ưu tiên từ trái sang phải (vi,en)",
+      "mode": "input",
+      "format": "text",
+      "default": "vi,en"
+    }
+  }
+}

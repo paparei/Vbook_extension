@@ -5,6 +5,18 @@
   },
   "data": [
     {
+      "name": "MangaDex",
+      "author": "paparei",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/plugin.json",
+      "version": 2,
+      "source": "https://mangadex.org",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/icon.png",
+      "description": "Đọc manga đa ngôn ngữ trên MangaDex",
+      "type": "comic",
+      "locale": "global"
+    },
+    {
       "name": "Anime47",
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/plugin.zip",

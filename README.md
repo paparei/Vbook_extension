@@ -16,9 +16,12 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 
 | Tên Extension | Loại | Nguồn | Phiên bản |
 | ------------- | ---- | ----- | --------- |
+| **MangaDex** | Comic | `https://mangadex.org` | v2 |
 | **Anime47** | Video | `https://anime47.best` | v23 |
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
+
+MangaDex mặc định ưu tiên chương tiếng Việt rồi tiếng Anh. Có thể đổi danh sách mã ngôn ngữ (phân tách bằng dấu phẩy, ví dụ `vi,en`) trong cài đặt extension.
 
 ## Anime47: tạo proxy riêng
 
