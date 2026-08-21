@@ -20,8 +20,11 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 | **Anime47** | Video | `https://anime47.best` | v23 |
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
+| **BatCave** | Comic | `https://batcave.biz` | v1 |
 
 MangaDex mặc định ưu tiên chương tiếng Việt rồi tiếng Anh. Có thể đổi danh sách mã ngôn ngữ (phân tách bằng dấu phẩy, ví dụ `vi,en`) trong cài đặt extension.
+
+BatCave có thể yêu cầu đăng nhập do xác thực/Cloudflare. Khi gặp lỗi xác thực, đăng nhập BatCave trong trình duyệt rồi sao chép cookie phiên vào cài đặt extension.
 
 ## Anime47: tạo proxy riêng
 

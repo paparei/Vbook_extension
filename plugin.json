@@ -51,6 +51,17 @@
       "description": "Xem Anime Hay - miễn phí chất lượng cao với phụ đề Tiếng Việt, Thuyết Minh, Lồng Tiếng (animehay.fm đã chuyển sang animevietsub.gg)",
       "type": "video",
       "locale": "vi_VN"
+    },
+    {
+      "name": "BatCave",
+      "author": "paparei",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/plugin.json",
+      "version": 1,
+      "source": "https://batcave.biz",
+      "description": "Read English comics from BatCave. A signed-in site cookie may be required.",
+      "type": "comic",
+      "locale": "en_US"
     }
   ]
 }
