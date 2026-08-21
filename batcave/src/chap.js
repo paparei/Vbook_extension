@@ -10,5 +10,5 @@ function execute(url) {
     if (error) return error;
 
     var images = pageImages(response.html(), html);
-    return images.length ? Response.success(images) : Response.error('Không tìm thấy ảnh issue. Cookie BatCave có thể đã hết hạn.');
+    return images.length ? Response.success(images) : Response.error('Không tìm thấy ảnh issue. Hãy mở Source page và đăng nhập lại.');
 }

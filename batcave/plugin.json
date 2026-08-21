@@ -2,10 +2,10 @@
   "metadata": {
     "name": "BatCave",
     "author": "paparei",
-    "version": 1,
+    "version": 2,
     "source": "https://batcave.biz",
     "regexp": "https?://(www\\.)?batcave\\.biz/(?:[0-9][^/?#]*\\.html|reader/[0-9]+/[0-9]+).*$",
-    "description": "Read English comics from BatCave. A signed-in site cookie may be required.",
+    "description": "Read English comics from BatCave. If login is required, open Source page and sign in.",
     "locale": "en_US",
     "language": "javascript",
     "type": "comic"
@@ -17,13 +17,5 @@
     "search": "search.js",
     "toc": "toc.js",
     "chap": "chap.js"
-  },
-  "config": {
-    "batcave_cookie": {
-      "title": "BatCave Cookie (optional; copy after signing in)",
-      "mode": "input",
-      "format": "text",
-      "default": ""
-    }
   }
 }

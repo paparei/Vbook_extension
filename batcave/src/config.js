@@ -22,7 +22,7 @@ function cleanText(value) {
 function configuredCookie() {
     var value = '';
     try {
-        if (batcave_cookie) value = String(batcave_cookie);
+        value = String(localCookie.getCookie() || '');
     } catch (error) {}
     return trimText(value.replace(/[\r\n]/g, ''));
 }
@@ -89,7 +89,7 @@ function pageResponseError(response, html, action) {
     var status = Number(response.status) || 0;
     var blocked = status === 401 || status === 403 || /cf-chl-|just a moment|<title>[^<]*(?:sign in to keep reading|401 unauthorized)/i.test(html || '');
     if (blocked) {
-        return Response.error('BatCave đang yêu cầu xác thực/Cloudflare. Hãy đăng nhập trên trình duyệt rồi nhập Cookie vào cài đặt extension.');
+        return Response.error('BatCave đang yêu cầu xác thực/Cloudflare. Hãy mở Source page trong vBook và đăng nhập.');
     }
     if (!response.ok) return Response.error('Không thể ' + action + (status ? ' (HTTP ' + status + ')' : ''));
     if (!html) return Response.error('BatCave trả về trang trống');

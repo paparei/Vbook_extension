@@ -34,7 +34,9 @@ function mockResponse() {
     };
 }
 
-global.batcave_cookie = 'session=abc\r\nInjected: no';
+global.localCookie = {
+    getCookie() { return 'session=abc\r\nInjected: no'; }
+};
 global.Response = {
     success(data, next) { return { ok: true, data, next }; },
     error(error) { return { ok: false, error }; }
@@ -54,7 +56,8 @@ function run(name) {
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
 assert.strictEqual(manifest.metadata.type, 'comic');
-assert.strictEqual(manifest.metadata.version, 1);
+assert.strictEqual(manifest.metadata.version, 2);
+assert.strictEqual(manifest.config, undefined);
 ['home', 'gen', 'detail', 'search', 'toc', 'chap'].forEach(function (name) {
     assert.ok(manifest.script[name], 'missing script: ' + name);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])), 'missing file: ' + manifest.script[name]);
@@ -141,6 +144,6 @@ assert.strictEqual(run('chap.js')('https://batcave.biz/not-a-reader').ok, false)
 fixture = { status: 403, html: '<title>Just a moment...</title><script>window._cf_chl_opt={};</script>' };
 result = run('gen.js')('https://batcave.biz/', '1');
 assert.strictEqual(result.ok, false);
-assert.ok(result.error.indexOf('Cookie') >= 0);
+assert.ok(result.error.indexOf('Source page') >= 0);
 
 console.log('BatCave self-check PASS');

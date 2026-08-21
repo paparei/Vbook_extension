@@ -10,5 +10,5 @@ function execute(url) {
     if (error) return error;
 
     var chapters = readerLinks(response.html(), html);
-    return chapters.length ? Response.success(chapters) : Response.error('Không tìm thấy issue. Cookie BatCave có thể đã hết hạn.');
+    return chapters.length ? Response.success(chapters) : Response.error('Không tìm thấy issue. Hãy mở Source page và đăng nhập lại.');
 }

@@ -57,9 +57,10 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/plugin.json",
-      "version": 1,
+      "version": 2,
       "source": "https://batcave.biz",
-      "description": "Read English comics from BatCave. A signed-in site cookie may be required.",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/icon.png",
+      "description": "Read English comics from BatCave. Open Source page and sign in if authentication is required.",
       "type": "comic",
       "locale": "en_US"
     }
