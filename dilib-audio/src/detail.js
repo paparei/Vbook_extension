@@ -33,10 +33,9 @@ function execute(url) {
         detail: [duration, classification, labeledValue(bodyText, 'Định dạng'), labeledValue(bodyText, 'Tình trạng')]
             .filter(function (value) { return !!value; }).join(' | '),
         url: url,
-        type: 'video',
-        format: 'stream',
+        type: 'audio',
+        format: 'audio',
         ongoing: /Đang Cập Nhật|Đang cập nhật/i.test(bodyText),
-        nsfw: /Adult \(18\+\)|Người Lớn \(18\+\)|adult|mature/i.test(bodyText),
-        audio: mediaUrl
+        nsfw: /Adult \(18\+\)|Người Lớn \(18\+\)|adult|mature/i.test(bodyText)
     });
 }

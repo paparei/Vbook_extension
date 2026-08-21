@@ -46,9 +46,9 @@ function run(name) {
 }
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
-assert.strictEqual(manifest.metadata.type, 'video');
-assert.strictEqual(manifest.metadata.version, 2);
-['home', 'genre', 'gen', 'detail', 'search', 'toc', 'track'].forEach(function (name) {
+assert.strictEqual(manifest.metadata.type, 'audio');
+assert.strictEqual(manifest.metadata.version, 3);
+['home', 'genre', 'gen', 'detail', 'search', 'toc', 'chap', 'track'].forEach(function (name) {
     assert.ok(manifest.script[name], 'missing script: ' + name);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])), 'missing file: ' + manifest.script[name]);
 });
@@ -126,8 +126,8 @@ result = run('detail.js')('https://dilib.vn/tien-nghich-14531.html');
 assert.strictEqual(result.ok, true);
 assert.strictEqual(result.data.name, 'TIÊN NGHỊCH');
 assert.strictEqual(result.data.author, 'Nhĩ Căn');
-assert.strictEqual(result.data.format, 'stream');
-assert.strictEqual(result.data.audio, 'https://dilib.vn/img/audio/14531-tien-nghich-thuviensach.vn.mp3');
+assert.strictEqual(result.data.type, 'audio');
+assert.strictEqual(result.data.format, 'audio');
 assert.ok(result.data.detail.indexOf('89:04:19') >= 0);
 
 result = run('toc.js')('https://dilib.vn/tien-nghich-14531.html');
@@ -138,7 +138,14 @@ assert.deepStrictEqual(result.data, [{
     host: 'https://dilib.vn'
 }]);
 
-result = run('track.js')('https://dilib.vn/tien-nghich-14531.html');
+result = run('chap.js')('https://dilib.vn/tien-nghich-14531.html');
+assert.strictEqual(result.ok, true);
+assert.deepStrictEqual(result.data, [{
+    title: 'Dilib',
+    data: 'https://dilib.vn/tien-nghich-14531.html'
+}]);
+
+result = run('track.js')(result.data[0].data);
 assert.strictEqual(result.ok, true);
 assert.deepStrictEqual(result.data, {
     type: 'native',
@@ -156,6 +163,7 @@ fixture = {
     html: '<h1>PDF only</h1><div class="primary"></div>'
 };
 assert.strictEqual(run('detail.js')('https://dilib.vn/pdf-only-1.html').ok, false);
+assert.strictEqual(run('chap.js')('https://evil.example/item-1.html').ok, false);
 assert.strictEqual(run('track.js')('https://evil.example/item-1.html').ok, false);
 
 fixture = { status: 404, html: '' };

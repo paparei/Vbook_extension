@@ -47,8 +47,8 @@ function run(name) {
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
 assert.strictEqual(manifest.metadata.type, 'comic');
-assert.strictEqual(manifest.metadata.version, 2);
-['home', 'genre', 'gen', 'detail', 'search', 'toc', 'page'].forEach(function (name) {
+assert.strictEqual(manifest.metadata.version, 3);
+['home', 'genre', 'gen', 'detail', 'search', 'toc', 'chap'].forEach(function (name) {
     assert.ok(manifest.script[name], 'missing script: ' + name);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])), 'missing file: ' + manifest.script[name]);
 });
@@ -144,7 +144,7 @@ fixture = {
         '<div><img src="/img/comic/One-Piece/img_00002.webp?v=4.90"></div>' +
         '<img src="/img/comic/One-Piece/img_00003.webp?v=4.90">'
 };
-result = run('page.js')('https://dilib.vn/truyen-tranh/one-piece-14728-chap-1.html');
+result = run('chap.js')('https://dilib.vn/truyen-tranh/one-piece-14728-chap-1.html');
 assert.strictEqual(result.ok, true);
 assert.deepStrictEqual(result.data, [
     'https://dilib.vn/img/comic/One-Piece/img_00002.webp?v=4.90',
@@ -152,7 +152,8 @@ assert.deepStrictEqual(result.data, [
 ]);
 
 assert.strictEqual(run('detail.js')('https://evil.example/book-1.html').ok, false);
-assert.strictEqual(run('page.js')('https://dilib.vn/one-piece-14728.html').ok, false);
+assert.strictEqual(run('chap.js')('https://dilib.vn/one-piece-14728.html').ok, false);
+assert.strictEqual(manifest.script.page, undefined);
 fixture = { status: 404, html: '' };
 assert.strictEqual(run('gen.js')('https://dilib.vn/truyen-tranh/', '1').ok, false);
 

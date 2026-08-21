@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Dilib Truyện Tranh",
     "author": "paparei",
-    "version": 2,
+    "version": 3,
     "source": "https://dilib.vn",
     "regexp": "https?://dilib\\.vn/(?:truyen-tranh/[^/?#]+-chap-\\d+\\.html|[^/?#]+-\\d+\\.html)(?:[?#].*)?",
     "description": "Đọc truyện tranh tiếng Việt trên Dilib. Tập trung vào Manga, Manhua, Manhwa và các thể loại truyện tranh phổ biến.",
@@ -18,6 +18,6 @@
     "detail": "detail.js",
     "search": "search.js",
     "toc": "toc.js",
-    "page": "page.js"
+    "chap": "chap.js"
   }
 }
