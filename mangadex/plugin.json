@@ -2,7 +2,7 @@
   "metadata": {
     "name": "MangaDex",
     "author": "paparei",
-    "version": 2,
+    "version": 3,
     "source": "https://mangadex.org",
     "regexp": "https?://(www\\.)?mangadex\\.org/(title|chapter)/[0-9a-fA-F-]{36}.*",
     "description": "Đọc manga đa ngôn ngữ trên MangaDex",

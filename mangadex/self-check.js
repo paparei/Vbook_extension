@@ -93,7 +93,7 @@ function run(name) {
 }
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
-assert.strictEqual(manifest.metadata.version, 2);
+assert.strictEqual(manifest.metadata.version, 3);
 ['home', 'genre', 'gen', 'detail', 'search', 'toc', 'chap'].forEach(function (name) {
     assert.ok(manifest.script[name], 'missing script: ' + name);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])), 'missing file: ' + manifest.script[name]);
@@ -112,6 +112,21 @@ assert.strictEqual(result.data[0].cover, 'https://uploads.mangadex.org/covers/' 
 let query = new URL(requests[0].url).searchParams;
 assert.deepStrictEqual(query.getAll('contentRating[]'), ['safe', 'suggestive', 'erotica']);
 assert.strictEqual(query.get('order[latestUploadedChapter]'), 'desc');
+assert.strictEqual(query.get('status[]'), 'ongoing');
+
+requests = [];
+run('gen.js')('follows', '0');
+query = new URL(requests[0].url).searchParams;
+assert.strictEqual(query.get('order[followedCount]'), 'desc');
+assert.strictEqual(query.get('status[]'), 'ongoing');
+
+requests = [];
+run('gen.js')('rating', '0');
+assert.strictEqual(new URL(requests[0].url).searchParams.has('status[]'), false);
+
+requests = [];
+run('gen.js')('completed', '0');
+assert.strictEqual(new URL(requests[0].url).searchParams.get('status[]'), 'completed');
 
 requests = [];
 result = run('search.js')('One & Only', '0');
