@@ -21,9 +21,13 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
 | **BatCave** | Comic | `https://batcave.biz` | v2 |
+| **Dilib Truyện Tranh** | Comic | `https://dilib.vn` | v1 |
+| **Dilib Sách Nói & Radio** | Video (Audio) | `https://dilib.vn` | v1 |
 | **OpenAI Compatible Translate** | Translate | `https://ai.lts.asia/v1` | v1 |
 
 MangaDex mặc định ưu tiên chương tiếng Việt rồi tiếng Anh. Có thể đổi danh sách mã ngôn ngữ (phân tách bằng dấu phẩy, ví dụ `vi,en`) trong cài đặt extension.
+
+Dilib Truyện Tranh hỗ trợ đọc Manga, Manhua, Manhwa, Webtoon và các thể loại truyện tranh. Dilib Sách Nói & Radio dùng loại `Video (Audio)` để phát MP3 bằng trình phát hiện tại của vBook.
 
 ## Anime47: tạo proxy riêng
 
