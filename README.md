@@ -24,7 +24,7 @@ Kho extension cho ứng dụng [vBook](https://vbook.app).
 | **BatCave** | Comic | `https://batcave.biz` | v2 |
 | **Dilib Truyện Tranh** | Comic | `https://dilib.vn` | v3 |
 | **Dilib Sách Nói & Radio** | Audio | `https://dilib.vn` | v3 |
-| **Dilib Sách Điện Tử** | Novel (TTS) | `https://dilib.vn` | v1 |
+| **Dilib Sách Điện Tử** | Novel (TTS) | `https://dilib.vn` | v2 |
 | **OpenAI Compatible Translate** | Translate | `https://ai.lts.asia/v1` | v1 |
 
 ## Phát triển

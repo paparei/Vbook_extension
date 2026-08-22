@@ -2,9 +2,8 @@ load('config.js');
 
 function execute(key, page) {
     key = trimText(key);
-    if (!key) return Response.success([]);
-
     var current = pageNumber(page);
+    Log.log('dilib-ebook search: ' + (key ? 'query' : 'browse') + ' page ' + current);
     var response = fetchPage(searchPageUrl(key, current));
     if (!response) return Response.error(lastPageError || 'Không thể tìm sách điện tử');
     if (!response.ok) return Response.error('Không thể tìm sách điện tử' + (response.status ? ' (HTTP ' + response.status + ')' : ''));
@@ -13,6 +12,7 @@ function execute(key, page) {
 
     var doc = response.html();
     var items = parseBookList(doc);
+    Log.log('dilib-ebook search: found ' + items.length + ' books');
     var total = searchResultTotal(doc);
     var next = hasNextPage(doc, current) || total > current * SEARCH_PAGE_SIZE ? String(current + 1) : '';
     return Response.success(items, next);

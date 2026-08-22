@@ -141,6 +141,9 @@ global.Response = {
     success(data, data2) { return { ok: true, data, data2 }; },
     error(error) { return { ok: false, error }; }
 };
+global.Log = {
+    log() {}
+};
 global.fetch = function (url) {
     let html = '';
     if (url.includes('/search.php?')) html = searchHtml;
@@ -160,7 +163,18 @@ function run(name) {
     return global.execute;
 }
 
-let result = run('search.js')('sách thử', '1');
+let result = run('home.js')();
+assert.strictEqual(result.ok, true);
+assert.deepStrictEqual(result.data, [
+    { title: 'Sách điện tử', input: '', script: 'search.js' }
+]);
+
+result = run(result.data[0].script)(result.data[0].input, '1');
+assert.strictEqual(result.ok, true);
+assert.strictEqual(result.data.length, 1);
+assert.strictEqual(result.data[0].name, 'Sách thử');
+
+result = run('search.js')('sách thử', '1');
 assert.strictEqual(result.ok, true);
 assert.deepStrictEqual(result.data[0], {
     name: 'Sách thử',

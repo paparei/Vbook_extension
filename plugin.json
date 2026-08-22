@@ -105,7 +105,7 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/plugin.json",
-      "version": 1,
+      "version": 2,
       "source": "https://dilib.vn",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/icon.png",
       "description": "Đọc EPUB tiếng Việt từ Dilib bằng trình đọc văn bản VBook, hỗ trợ TTS và lưu vị trí đọc.",
