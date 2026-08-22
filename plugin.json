@@ -57,7 +57,7 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/phimtv/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/phimtv/plugin.json",
-      "version": 1,
+      "version": 2,
       "source": "https://phimtv.cv",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/phimtv/icon.png",
       "description": "Xem phim Vietsub, thuyết minh và lồng tiếng trên PhimTV.",
