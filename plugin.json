@@ -21,10 +21,10 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/plugin.json",
-      "version": 23,
+      "version": 24,
       "source": "https://anime47.best",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/icon.png",
-      "description": "Xem anime vietsub online tại Anime47",
+      "description": "Xem anime vietsub online tại Anime47. Cần tài khoản để xem; VlogPhim cần tự triển khai Cloudflare Worker từ proxy-worker.mjs trong repository và nhập URL Worker vào cài đặt extension.",
       "type": "video",
       "locale": "vi_VN"
     },

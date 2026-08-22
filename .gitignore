@@ -12,11 +12,14 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 
-# Temporary files
+# Local development files (keep locally; do not publish)
 temp_*
 *.tmp
 *.log
+.vscode/
 extension.code-workspace
+package.json
+**/self-check.js
 build_zip.ps1
 make_zip.js
 probe.ps1

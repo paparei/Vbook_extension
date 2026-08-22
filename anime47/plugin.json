@@ -2,10 +2,10 @@
   "metadata": {
     "name": "Anime47",
     "author": "paparei",
-    "version": 23,
+    "version": 24,
     "source": "https://anime47.best",
     "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem)/.*",
-    "description": "Xem anime vietsub online tại Anime47 (cần tài khoản để xem)",
+    "description": "Xem anime vietsub online tại Anime47. Cần tài khoản để xem; VlogPhim cần tự triển khai Cloudflare Worker từ proxy-worker.mjs trong repository và nhập URL Worker vào cài đặt extension.",
     "locale": "vi_VN",
     "language": "javascript",
     "type": "video"
@@ -34,7 +34,7 @@
       "default": ""
     },
     "a47_proxy_url": {
-      "title": "URL Cloudflare Worker riêng (xem README)",
+      "title": "URL Cloudflare Worker riêng (xem mô tả extension)",
       "mode": "input",
       "format": "text",
       "default": ""
