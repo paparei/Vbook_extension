@@ -20,6 +20,7 @@ https://raw.githubusercontent.com/paparei/Vbook_extension/main/plugin.json
 | **Anime47** | Video | `https://anime47.best` | v23 |
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
+| **PhimTV** | Video | `https://phimtv.cv` | v1 |
 | **BatCave** | Comic | `https://batcave.biz` | v2 |
 | **Dilib Truyện Tranh** | Comic | `https://dilib.vn` | v3 |
 | **Dilib Sách Nói & Radio** | Audio | `https://dilib.vn` | v3 |
