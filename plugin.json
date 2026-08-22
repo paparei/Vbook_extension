@@ -101,6 +101,18 @@
       "locale": "vi_VN"
     },
     {
+      "name": "Dilib Sách Điện Tử",
+      "author": "paparei",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/plugin.json",
+      "version": 1,
+      "source": "https://dilib.vn",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/icon.png",
+      "description": "Đọc EPUB tiếng Việt từ Dilib bằng trình đọc văn bản VBook, hỗ trợ TTS và lưu vị trí đọc.",
+      "type": "novel",
+      "locale": "vi_VN"
+    },
+    {
       "name": "OpenAI Compatible Translate",
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/plugin.zip",
