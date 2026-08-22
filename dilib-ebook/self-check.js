@@ -92,7 +92,7 @@ const archive = zip([
     { name: 'META-INF/container.xml', content: container, method: 8, fixed: true },
     { name: 'OPS/content.opf', content: opf, method: 8 },
     { name: 'OPS/cover.xhtml', content: '<html><body><img src="cover.jpg"/></body></html>', method: 8 },
-    { name: 'OPS/text/one.xhtml', content: '<html><head><title>Ignored</title></head><body><h1 id="x">Chương Một</h1><p style="x>y" onclick="bad()">Tiếng Việt: <a href="javascript:bad()">Trời xanh.</a></p><script>bad()</script><img src="x"/></body></html>', method: 8 },
+    { name: 'OPS/text/one.xhtml', content: '<html><head><title>Ignored</title></head><body><h1 id="x">Chương Một</h1><p style="x>y" onclick="bad()">Tiếng Việt: <a href="javascript:bad()">Trời xanh.</a> https://thuviensach.vn</p><p>https://www.thuviensach.vn/</p><script>bad()</script><img src="x"/></body></html>', method: 8 },
     { name: 'OPS/text/two.html', content: '<html><body><p>Nội dung phần hai đủ để đọc.</p></body></html>', method: 0 },
     { name: 'OPS/outline.xhtml', content: '<html><body><h1>Document Outline</h1><p>Notes</p></body></html>', method: 8 }
 ]);
@@ -106,6 +106,7 @@ assert.deepStrictEqual(chapters, [
 const first = epubChapterContent(base64, chapters[0].path);
 assert.strictEqual(first.title, 'Chương Một');
 assert.ok(first.html.includes('Tiếng Việt: Trời xanh.'));
+assert.ok(!/thuviensach\.vn/i.test(first.html));
 assert.ok(!/<(?:script|img|a)\b|\s(?:style|onclick|href|id)=/i.test(first.html));
 assert.strictEqual(epubChapterContent(base64, chapters[1].path).title, 'Phần 2');
 assert.throws(function () { epubChapterContent(base64, 'OPS/outline.xhtml'); }, /Phần EPUB không (?:hợp lệ|có văn bản)/);
@@ -119,14 +120,16 @@ assert.throws(function () { epubChapterList(corrupt.toString('base64')); }, /CRC
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'));
 assert.strictEqual(manifest.metadata.type, 'novel');
-['search', 'detail', 'toc', 'chap'].forEach(function (name) {
+['home', 'search', 'detail', 'toc', 'chap'].forEach(function (name) {
     assert.ok(manifest.script[name]);
     assert.ok(fs.existsSync(path.join(src, manifest.script[name])));
 });
 
-const searchHtml = '<html><body><p>Có 1 kết quả</p>' +
+const searchHtml = '<html><body><p>Có 2 kết quả</p>' +
     '<a class="woocommerce-LoopProduct-link" href="/sach-thu-123.html"><img src="/cover.jpg" alt="Sách thử"></a>' +
-    '<a class="woocommerce-LoopProduct-link" href="/sach-thu-123.html">Sách thử</a></body></html>';
+    '<a class="woocommerce-LoopProduct-link" href="/sach-thu-123.html">Sách thử</a>' +
+    '<a class="woocommerce-LoopProduct-link" href="/sach-pdf-456.html"><img src="/pdf.jpg" alt="Sách PDF"></a>' +
+    '<a class="woocommerce-LoopProduct-link" href="/sach-pdf-456.html">Sách PDF</a></body></html>';
 const detailHtml = '<html><head><meta property="og:title" content="Sách thử">' +
     '<meta property="og:image" content="/cover.jpg"><meta property="og:description" content="Mô tả sách"></head>' +
     '<body><main class="primary"><h1>Sách thử</h1><p>Tác giả: Tác giả thử Số trang: 100 Định dạng: EPUB Tình trạng: Hoàn thành</p>' +
@@ -148,6 +151,7 @@ global.fetch = function (url) {
     let html = '';
     if (url.includes('/search.php?')) html = searchHtml;
     else if (url.endsWith('/sach-thu-123.html')) html = detailHtml;
+    else if (url.endsWith('/sach-pdf-456.html')) html = '<html><body><h1>Sách PDF</h1></body></html>';
     else if (url.endsWith('/download/epub/test123')) epubFetches++;
     else return { ok: false, status: 404 };
     return {
@@ -206,9 +210,12 @@ assert.strictEqual(run('chap.js')('https://evil.example/file.epub#entry=x').ok, 
 
 const sample = path.join(os.tmpdir(), 'dilib-451.epub');
 if (fs.existsSync(sample)) {
-    const live = epubChapterList(fs.readFileSync(sample).toString('base64'));
+    const sampleBase64 = fs.readFileSync(sample).toString('base64');
+    const live = epubChapterList(sampleBase64);
+    const liveHtml = epubChapterContent(sampleBase64, live[0].path).html;
     assert.strictEqual(live.length, 2);
-    assert.ok(epubChapterContent(fs.readFileSync(sample).toString('base64'), live[0].path).html.length > 100000);
+    assert.ok(liveHtml.length > 100000);
+    assert.ok(!/thuviensach\.vn/i.test(liveHtml));
     console.log('dilib-ebook self-check: extension chain + downloaded Dilib EPUB passed');
 } else {
     console.log('dilib-ebook self-check: extension chain passed');

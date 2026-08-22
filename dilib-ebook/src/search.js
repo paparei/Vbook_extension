@@ -11,8 +11,13 @@ function execute(key, page) {
     if (!html) return Response.error(lastPageError || 'Dilib trả về trang trống');
 
     var doc = response.html();
-    var items = parseBookList(doc);
-    Log.log('dilib-ebook search: found ' + items.length + ' books');
+    var candidates = parseBookList(doc);
+    var items = candidates.filter(function (item) {
+        var detail = fetchPage(item.link);
+        if (!detail || !detail.ok) return false;
+        try { return !!epubDownloadUrl(detail.html()); } catch (error) { return false; }
+    });
+    Log.log('dilib-ebook search: kept ' + items.length + ' of ' + candidates.length + ' EPUB books');
     var total = searchResultTotal(doc);
     var next = hasNextPage(doc, current) || total > current * SEARCH_PAGE_SIZE ? String(current + 1) : '';
     return Response.success(items, next);

@@ -451,6 +451,7 @@ function epubSafeHtml(html) {
 }
 
 function epubCleanDocument(text) {
+    text = String(text || '').replace(/https?:\/\/(?:www\.)?thuviensach\.vn\/?/gi, '');
     var doc = Html.parse(text);
     var body = epubFirst(doc, 'body');
     if (!body) throw new Error('Phần EPUB không có nội dung HTML');

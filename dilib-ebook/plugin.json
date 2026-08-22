@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Dilib Sách Điện Tử",
     "author": "paparei",
-    "version": 2,
+    "version": 3,
     "source": "https://dilib.vn",
     "regexp": "https?://dilib\\.vn/[^/?#]+-\\d+\\.html(?:[?#].*)?",
     "description": "Đọc EPUB tiếng Việt từ Dilib bằng trình đọc văn bản VBook, hỗ trợ TTS và lưu vị trí đọc.",
