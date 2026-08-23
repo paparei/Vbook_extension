@@ -2,7 +2,7 @@
   "metadata": {
     "name": "PhimTV",
     "author": "paparei",
-    "version": 2,
+    "version": 3,
     "source": "https://phimtv.cv",
     "regexp": "(www\\.)?phimtv\\.cv/.*",
     "description": "Xem phim Vietsub, thuyết minh và lồng tiếng trên PhimTV.",

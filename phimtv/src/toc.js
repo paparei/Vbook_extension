@@ -8,8 +8,9 @@ function execute(url) {
     if (!doc) return Response.success([]);
 
     var firstPlay = doc.select('a[href*="/play/"]').first();
-    if (doc.select('.server-group').size() === 0 && firstPlay) {
-        response = fetchPage(normalizeUrl(firstPlay.attr('href')));
+    var firstPlayLink = firstPlay ? normalizeUrl(firstPlay.attr('href')) : '';
+    if (doc.select('.server-group').size() === 0 && firstPlayLink) {
+        response = fetchPage(firstPlayLink);
         if (!response.ok) return Response.error('HTTP ' + response.status);
         doc = response.html();
         if (!doc) return Response.success([]);
@@ -19,12 +20,13 @@ function execute(url) {
     var seen = {};
     doc.select('.server-group').forEach(function (group) {
         var heading = group.select('div').first();
-        var serverName = heading ? cleanText(heading.text()).replace(/^Danh sách tập\s*#?\d*\s*/i, '') : '';
+        var serverName = heading ? cleanText(heading.text()).replace(/^Danh sách tập\s*#?\d*\s*/i, '').replace(/\s+Tập\s+\d+.*$/i, '') : '';
         group.select('ul.episodes a[href*="/play/"]').forEach(function (episode) {
             var link = normalizeUrl(episode.attr('href'));
             if (!link || seen[link]) return;
             seen[link] = true;
-            var name = cleanText(episode.text());
+            var number = link.match(/tap-(\d+)-/i);
+            var name = number ? 'Tập ' + number[1] : cleanText(episode.text());
             result.push({ name: serverName ? serverName + ' - ' + name : name, url: link, host: BASE_URL });
         });
     });
@@ -36,5 +38,6 @@ function execute(url) {
         seen[link] = true;
         result.push({ name: cleanText(episode.text()) || 'Xem phim', url: link, host: BASE_URL });
     });
+    if (!result.length && firstPlayLink) result.push({ name: 'Full', url: firstPlayLink, host: BASE_URL });
     return Response.success(result);
 }
