@@ -33,39 +33,80 @@ function buildQuery(pairs) {
     return parts.join('&');
 }
 
+function isTransientStatus(status) {
+    return !status || status === 429 || status >= 500;
+}
+
+function cacheKey(url) {
+    return 'md_api:' + url;
+}
+
+function readApiCache(url) {
+    // ponytail: 24-hour per-URL fallback; add LRU eviction only if storage pressure appears.
+    try {
+        var cached = JSON.parse(localStorage.getItem(cacheKey(url)) || 'null');
+        if (!cached || !cached.time || new Date().getTime() - cached.time > 86400000) {
+            localStorage.removeItem(cacheKey(url));
+            return null;
+        }
+        return cached.data || null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function writeApiCache(url, data) {
+    try {
+        localStorage.setItem(cacheKey(url), JSON.stringify({ time: new Date().getTime(), data: data }));
+    } catch (error) {}
+}
+
 function apiRequest(path, pairs) {
     var url = API_URL + path;
     var query = buildQuery(pairs || []);
     if (query) url += '?' + query;
 
+    var cacheable = path.indexOf('/at-home/server/') !== 0;
     lastApiError = '';
-    var response;
-    try {
-        response = fetch(url, {
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'VBook-MangaDex/2.0'
-            },
-            timeout: 20000
-        });
-    } catch (error) {
-        lastApiError = 'network error';
-        return null;
-    }
-    if (!response || !response.ok) {
-        lastApiError = response && response.status ? 'HTTP ' + response.status : 'network error';
-        return null;
+    for (var attempt = 0; attempt < 3; attempt++) {
+        var response = null;
+        try {
+            response = fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'VBook-MangaDex/4.0'
+                },
+                timeout: 20000
+            });
+        } catch (error) {
+            lastApiError = 'network error';
+        }
+
+        if (response && response.ok) {
+            try {
+                var body = response.text ? response.text() : '';
+                var data = body ? JSON.parse(body) : (response.json ? response.json() : null);
+                if (!data) {
+                    lastApiError = 'empty response';
+                    return null;
+                }
+                if (cacheable) writeApiCache(url, data);
+                return data;
+            } catch (error) {
+                lastApiError = 'invalid JSON';
+                return null;
+            }
+        }
+
+        var status = response && response.status ? response.status : 0;
+        lastApiError = status ? 'HTTP ' + status : 'network error';
+        if (!isTransientStatus(status)) return null;
+        if (attempt < 2) sleep(500 * (attempt + 1));
     }
 
-    try {
-        var body = response.text ? response.text() : '';
-        var data = body ? JSON.parse(body) : (response.json ? response.json() : null);
-        if (!data) lastApiError = 'empty response';
-        return data;
-    } catch (error) {
-        lastApiError = 'invalid JSON';
-        return null;
-    }
+    var cached = cacheable ? readApiCache(url) : null;
+    if (cached) lastApiError = '';
+    return cached;
 }
 
 function apiError(message) {
