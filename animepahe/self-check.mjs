@@ -9,14 +9,14 @@ async function get(path) {
     return response.text();
 }
 
-const search = await get("/?s=one%20piece");
+const search = await get("/?s=liar%20game");
 assert.match(search, /class=["'][^"']*\bbs\b/i);
-assert.match(search, /\/series\/one-piece\//i);
+assert.match(search, /\/series\/liar-game\//i);
 
-const detail = await get("/series/one-piece/");
+const detail = await get("/series/liar-game/");
 assert.match(detail, /class=["'][^"']*\bentry-title\b/i);
 assert.match(detail, /class=["'][^"']*\bsynp\b/i);
-const episodeUrl = detail.match(/href=["'](https:\/\/animepahe\.ch\/one-piece-episode-[^"']+)["']/i);
+const episodeUrl = detail.match(/href=["'](https:\/\/animepahe\.ch\/liar-game-episode-[^"']+)["']/i);
 assert.ok(episodeUrl, "episode link missing");
 
 const episode = await get(new URL(episodeUrl[1]).pathname);
@@ -31,11 +31,10 @@ const providers = embeds.map(html => {
     if (/blogger/i.test(url)) return "Blogger";
     return "Other";
 });
-const selectServers = servers => servers.filter(server => server === "MegaPlay").length
-    ? servers.filter(server => server === "MegaPlay")
-    : servers;
-assert.deepEqual(selectServers(["Blogger", "FlixCloud"]), ["Blogger", "FlixCloud"], "fallback servers removed without MegaPlay");
-assert.deepEqual(selectServers(providers), ["MegaPlay"], "MegaPlay was not isolated");
+const orderServers = servers => servers.filter(server => server === "MegaPlay")
+    .concat(servers.filter(server => server !== "MegaPlay"));
+assert.deepEqual(orderServers(["Blogger", "FlixCloud"]), ["Blogger", "FlixCloud"], "fallback server order changed");
+assert.deepEqual(orderServers(providers), ["MegaPlay", "Blogger", "FlixCloud"], "Liar Game fallbacks missing or misordered");
 
 const megaEmbed = embeds.map(html => (html.match(/<iframe[^>]+src=['"]([^'"]*megaplay[^'"]*)/i) || [])[1]).find(Boolean);
 assert.ok(megaEmbed, "MegaPlay server missing");
@@ -67,4 +66,4 @@ const icon = await readFile(new URL("./icon.png", import.meta.url));
 assert.equal(icon.readUInt32BE(16), 200, "icon width");
 assert.equal(icon.readUInt32BE(20), 200, "icon height");
 
-console.log(`AnimePahe self-check passed: fallback policy retained; MegaPlay API, playlists, and segment playable`);
+console.log(`AnimePahe self-check passed: Liar Game exposes all servers; MegaPlay API, playlists, and segment playable`);

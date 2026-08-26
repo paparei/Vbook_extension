@@ -19,7 +19,6 @@ function execute(url) {
     let response = fetchPage(url);
     if (!response.ok) return Response.error("HTTP " + response.status);
     let servers = [];
-    let nativeServers = [];
 
     response.html().select(".gov-the-embed").forEach(function (el) {
         let match = el.attr("onclick").match(/putMi\s*\(\s*this\s*,\s*['\"]([^'\"]+)['\"]\s*\)/);
@@ -30,10 +29,9 @@ function execute(url) {
             title: title + (provider ? " (" + provider + ")" : ""),
             data: JSON.stringify({ payload: match[1], referer: url })
         };
-        servers.push(server);
-        if (provider === "MegaPlay") nativeServers.push(server);
+        if (provider === "MegaPlay") servers.unshift(server);
+        else servers.push(server);
     });
-    if (nativeServers.length) servers = nativeServers;
 
     return servers.length
         ? Response.success(servers)

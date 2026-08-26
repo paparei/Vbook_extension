@@ -98,6 +98,6 @@ function execute(data) {
     let stream = directStream(response.text());
     if (stream) return playback(stream, "native", embed);
 
-    // ponytail: JS-only hosts use vBook's headless resolver; add native host resolvers when stable endpoints are known.
-    return playback(embed, "webview", input.referer);
+    // ponytail: JS-only hosts use vBook's media sniffer; add native host resolvers when stable endpoints are known.
+    return playback(embed, "auto", input.referer);
 }
