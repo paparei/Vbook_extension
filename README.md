@@ -19,6 +19,7 @@ Kho extension cho ứng dụng [vBook](https://vbook.app).
 | **MangaDex** | Comic | `https://mangadex.org` | v4 |
 | **Anime47** | Video | `https://anime47.best` | v24 |
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
+| **AnimePahe** | Video | `https://animepahe.ch` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
 | **PhimTV** | Video | `https://phimtv.cv` | v3 |
 | **BatCave** | Comic | `https://batcave.biz` | v2 |

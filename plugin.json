@@ -41,6 +41,18 @@
       "locale": "vi_VN"
     },
     {
+      "name": "AnimePahe",
+      "author": "paparei",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/plugin.json",
+      "version": 1,
+      "source": "https://animepahe.ch",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/icon.png",
+      "description": "Watch anime online in HD with English subtitles on AnimePahe.",
+      "type": "video",
+      "locale": "en_US"
+    },
+    {
       "name": "Anime Hay",
       "author": "kychi",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/plugin.zip",
