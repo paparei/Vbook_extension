@@ -98,7 +98,6 @@ function execute(data) {
     let stream = directStream(response.text());
     if (stream) return playback(stream, "native", embed);
 
-    // ponytail: Blogger's private player RPC is unsupported; add it when a stable first-party endpoint is known.
-    if (embed.indexOf("blogger.com/") !== -1) return Response.error("Blogger cannot be resolved; choose MegaPlay");
-    return Response.error("No playable stream found; choose MegaPlay");
+    // ponytail: JS-only hosts use vBook's headless resolver; add native host resolvers when stable endpoints are known.
+    return playback(embed, "webview", input.referer);
 }

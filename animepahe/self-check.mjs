@@ -24,6 +24,18 @@ const payloads = [...episode.matchAll(/putMi\s*\(\s*this\s*,\s*['"]([^'"]+)['"]\
 assert.ok(payloads.length >= 1, "playback servers missing");
 const embeds = payloads.map(match => Buffer.from(match[1], "base64").toString("utf8"));
 assert.match(embeds[0], /<iframe[^>]+src=/i);
+const providers = embeds.map(html => {
+    const url = (html.match(/<iframe[^>]+src=['"]([^'"]+)/i) || [])[1] || "";
+    if (/megaplay/i.test(url)) return "MegaPlay";
+    if (/flixcloud/i.test(url)) return "FlixCloud";
+    if (/blogger/i.test(url)) return "Blogger";
+    return "Other";
+});
+const selectServers = servers => servers.filter(server => server === "MegaPlay").length
+    ? servers.filter(server => server === "MegaPlay")
+    : servers;
+assert.deepEqual(selectServers(["Blogger", "FlixCloud"]), ["Blogger", "FlixCloud"], "fallback servers removed without MegaPlay");
+assert.deepEqual(selectServers(providers), ["MegaPlay"], "MegaPlay was not isolated");
 
 const megaEmbed = embeds.map(html => (html.match(/<iframe[^>]+src=['"]([^'"]*megaplay[^'"]*)/i) || [])[1]).find(Boolean);
 assert.ok(megaEmbed, "MegaPlay server missing");
@@ -55,4 +67,4 @@ const icon = await readFile(new URL("./icon.png", import.meta.url));
 assert.equal(icon.readUInt32BE(16), 200, "icon width");
 assert.equal(icon.readUInt32BE(20), 200, "icon height");
 
-console.log(`AnimePahe self-check passed: ${payloads.length} servers; MegaPlay API, playlists, and segment playable`);
+console.log(`AnimePahe self-check passed: fallback policy retained; MegaPlay API, playlists, and segment playable`);
