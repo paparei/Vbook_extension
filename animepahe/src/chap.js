@@ -9,10 +9,12 @@ function execute(url) {
     response.html().select(".gov-the-embed").forEach(function (el) {
         let match = el.attr("onclick").match(/putMi\s*\(\s*this\s*,\s*['\"]([^'\"]+)['\"]\s*\)/);
         if (!match) return;
-        servers.push({
+        let server = {
             title: el.text().trim() || "Server",
             data: JSON.stringify({ payload: match[1], referer: url })
-        });
+        };
+        if (/megaplay/i.test(server.title)) servers.unshift(server);
+        else servers.push(server);
     });
 
     return servers.length
