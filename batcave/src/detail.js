@@ -13,8 +13,8 @@ function execute(url) {
     var name = firstAttr(doc, 'meta[property="og:title"]', 'content') || firstText(doc, 'h1');
     name = cleanText(name.replace(/\s+(?:Comics Online Free|Read Comics Online|[-|]\s*BatCave).*$/i, ''));
 
-    var cover = normalizeAssetUrl(firstAttr(doc, 'meta[property="og:image"]', 'content'));
-    if (!cover) cover = normalizeAssetUrl(firstAttr(doc, '.poster img, .cover img, [itemprop="image"]', 'data-src') || firstAttr(doc, '.poster img, .cover img, [itemprop="image"]', 'src'));
+    var cover = usableImageUrl(firstAttr(doc, 'meta[property="og:image"]', 'content'));
+    if (!cover) cover = elementImageUrl(doc.select('.poster img, .cover img, img[itemprop="image"]').first());
 
     var description = cleanText(firstAttr(doc, 'meta[property="og:description"]', 'content'));
     if (!description) description = firstText(doc, '[itemprop="description"], .description, .full-text, .story-text');

@@ -2,7 +2,7 @@
   "metadata": {
     "name": "BatCave",
     "author": "paparei",
-    "version": 2,
+    "version": 3,
     "source": "https://batcave.biz",
     "regexp": "https?://(www\\.)?batcave\\.biz/(?:[0-9][^/?#]*\\.html|reader/[0-9]+/[0-9]+).*$",
     "description": "Read English comics from BatCave. If login is required, open Source page and sign in.",

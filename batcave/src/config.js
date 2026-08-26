@@ -91,6 +91,9 @@ function pageResponseError(response, html, action) {
     if (blocked) {
         return Response.error('BatCave đang yêu cầu xác thực/Cloudflare. Hãy mở Source page trong vBook và đăng nhập.');
     }
+    if (status === 404) {
+        return Response.error('BatCave trả về HTTP 404. Cookie có thể đã hết hạn; hãy mở Source page và làm mới/đăng nhập lại. Nếu chỉ một truyện lỗi, truyện có thể đã bị xóa.');
+    }
     if (!response.ok) return Response.error('Không thể ' + action + (status ? ' (HTTP ' + status + ')' : ''));
     if (!html) return Response.error('BatCave trả về trang trống');
     return null;
@@ -123,27 +126,56 @@ function firstAttr(root, selector, attribute) {
     return element ? trimText(element.attr(attribute)) : '';
 }
 
+function srcsetUrl(value) {
+    return trimText(String(value || '').split(',')[0].replace(/\s+\d+(?:\.\d+)?[wx]\s*$/, ''));
+}
+
+function usableImageUrl(value) {
+    var url = normalizeAssetUrl(value);
+    return /(?:^|[\/_.-])(?:avatar|blank|favicon|icon|lazy|loading|logo|no[-_]?image|placeholder|profile|rating|spacer|sprite|userpic)(?:[\/_.-]|$)/i.test(url) ? '' : url;
+}
+
+function elementImageUrl(image) {
+    if (!image) return '';
+    var candidates = [
+        image.attr('data-src'),
+        image.attr('data-original'),
+        image.attr('data-lazy-src'),
+        srcsetUrl(image.attr('data-srcset')),
+        srcsetUrl(image.attr('srcset')),
+        image.attr('src')
+    ];
+    for (var i = 0; i < candidates.length; i++) {
+        var url = usableImageUrl(candidates[i]);
+        if (url) return url;
+    }
+    return '';
+}
+
 function parseComicList(doc) {
     var result = [];
     var seen = {};
     if (!doc) return result;
 
     doc.select('a[href*=".html"]').forEach(function (anchor) {
-        var link = normalizePageUrl(anchor.attr('href'));
+        var href = String(anchor.attr('href') || '');
+        var marker = String(anchor.attr('class') || '') + ' ' + String(anchor.attr('id') || '');
+        if (/(?:^|[\s_-])(?:comment|rating|review|vote)(?:[\s_-]|$)/i.test(marker) || /#(?:comment|review)(?:[-_\d]|$)/i.test(href)) return;
+
+        var link = normalizePageUrl(href).replace(/[?#].*$/, '');
         if (!isSeriesUrl(link) || seen[link]) return;
 
         var image = anchor.select('img').first();
+        var cover = elementImageUrl(image);
+        if (!cover) return;
+
         var titleElement = anchor.select('h1, h2, h3, h4, .title, .name').first();
         var name = cleanText(anchor.attr('title'));
         if (!name && titleElement) name = cleanText(titleElement.text());
         if (!name && image) name = cleanText(image.attr('alt') || image.attr('title'));
-        if (!name) name = cleanText(anchor.text());
-        if (!name) return;
+        if (!name || /^(?:cover|image|poster|read more|thumbnail)$/i.test(name)) return;
 
-        var cover = '';
-        if (image) cover = normalizeAssetUrl(image.attr('data-src') || image.attr('data-original') || image.attr('data-lazy-src') || image.attr('src'));
         var badge = anchor.select('.chapter, .issue, .badge, .latest').first();
-
         seen[link] = true;
         result.push({
             name: name,
@@ -217,7 +249,7 @@ function pageImages(doc, html) {
     if (doc) {
         doc.select('img').forEach(function (image) {
             var hint = String(image.attr('class') || '') + ' ' + String(image.attr('id') || '');
-            add(image.attr('data-src') || image.attr('data-original') || image.attr('data-lazy-src') || image.attr('src'), hint);
+            add(elementImageUrl(image), hint);
         });
         doc.select('source[srcset]').forEach(function (source) {
             var srcset = String(source.attr('srcset') || '').split(',')[0].replace(/\s+\d+(?:\.\d+)?[wx]\s*$/, '');
