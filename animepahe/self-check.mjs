@@ -36,6 +36,22 @@ const orderServers = servers => servers.filter(server => server === "MegaPlay")
 assert.deepEqual(orderServers(["Blogger", "FlixCloud"]), ["Blogger", "FlixCloud"], "fallback server order changed");
 assert.deepEqual(orderServers(providers), ["MegaPlay", "Blogger", "FlixCloud"], "Liar Game fallbacks missing or misordered");
 
+// The synthesized fallback: slug -> MyAnimeList id -> MegaPlay, used when an
+// episode lists only Blogger/FlixCloud (neither is resolvable outside a browser).
+const slug = new URL(episodeUrl[1]).pathname.match(/\/([a-z0-9-]+)-episode-(\d+)-english-(sub|dub)bed/i);
+assert.ok(slug, "episode slug not parseable");
+const prefix = await fetch(
+    `https://myanimelist.net/search/prefix.json?type=anime&keyword=${encodeURIComponent(slug[1].replaceAll("-", " "))}&v=1`,
+    { headers: { "User-Agent": "Mozilla/5.0" } }
+);
+assert.equal(prefix.ok, true, `MyAnimeList search: HTTP ${prefix.status}`);
+const malId = (await prefix.json()).categories[0].items[0].id;
+assert.equal(malId, 62331, "Liar Game MyAnimeList id lookup drifted");
+const synthesized = `https://megaplay.buzz/stream/mal/${malId}/${slug[2]}/${slug[3].toLowerCase()}`;
+const synthesizedPage = await fetch(synthesized, { headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://megaplay.buzz/" } });
+assert.equal(synthesizedPage.ok, true, `synthesized MegaPlay: HTTP ${synthesizedPage.status}`);
+assert.match(await synthesizedPage.text(), /id=['"]megaplay-player['"][^>]+data-id=['"]\d+['"]/i);
+
 const megaEmbed = embeds.map(html => (html.match(/<iframe[^>]+src=['"]([^'"]*megaplay[^'"]*)/i) || [])[1]).find(Boolean);
 assert.ok(megaEmbed, "MegaPlay server missing");
 const megaUrl = megaEmbed.replaceAll("&", "&");
@@ -66,4 +82,4 @@ const icon = await readFile(new URL("./icon.png", import.meta.url));
 assert.equal(icon.readUInt32BE(16), 200, "icon width");
 assert.equal(icon.readUInt32BE(20), 200, "icon height");
 
-console.log(`AnimePahe self-check passed: Liar Game exposes all servers; MegaPlay API, playlists, and segment playable`);
+console.log(`AnimePahe self-check passed: all servers exposed, MegaPlay synthesizable from slug, playlists and segment playable`);

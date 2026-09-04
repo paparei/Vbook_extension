@@ -45,7 +45,7 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/plugin.json",
-      "version": 4,
+      "version": 5,
       "source": "https://animepahe.ch",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/icon.png",
       "description": "Watch anime online in HD with English subtitles on AnimePahe.",
