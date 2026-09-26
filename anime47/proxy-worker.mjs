@@ -49,56 +49,21 @@ function rewritePlaylist(text, sourceUrl, requestUrl) {
   }).join("\n");
 }
 
-function append(left, right) {
-  const result = new Uint8Array(left.length + right.length);
-  result.set(left);
-  result.set(right, left.length);
-  return result;
-}
-
-function pngStripper() {
-  let buffered = new Uint8Array();
-  let done = false;
+function stripPng(bytes) {
   const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (bytes.length < 8 || signature.some((byte, i) => bytes[i] !== byte)) return bytes;
 
-  return new TransformStream({
-    transform(chunk, controller) {
-      if (done) {
-        controller.enqueue(chunk);
-        return;
-      }
-      buffered = append(buffered, chunk);
-      if (buffered.length < 8) return;
-      for (let i = 0; i < signature.length; i++) {
-        if (buffered[i] !== signature[i]) {
-          done = true;
-          controller.enqueue(buffered);
-          buffered = new Uint8Array();
-          return;
-        }
-      }
-
-      let offset = 8;
-      while (buffered.length >= offset + 12) {
-        const view = new DataView(buffered.buffer, buffered.byteOffset + offset, 4);
-        const length = view.getUint32(0);
-        if (length > 2 * 1024 * 1024) throw new Error("PNG wrapper is too large");
-        const end = offset + length + 12;
-        if (buffered.length < end) return;
-        const isEnd = buffered[offset + 4] === 73 && buffered[offset + 5] === 69 && buffered[offset + 6] === 78 && buffered[offset + 7] === 68;
-        offset = end;
-        if (isEnd) {
-          done = true;
-          if (buffered.length > offset) controller.enqueue(buffered.slice(offset));
-          buffered = new Uint8Array();
-          return;
-        }
-      }
-    },
-    flush(controller) {
-      if (!done && buffered.length) controller.enqueue(buffered);
-    },
-  });
+  let offset = 8;
+  while (bytes.length >= offset + 12) {
+    const length = new DataView(bytes.buffer, bytes.byteOffset + offset, 4).getUint32(0);
+    if (length > 2 * 1024 * 1024) throw new Error("PNG wrapper is too large");
+    const end = offset + length + 12;
+    if (bytes.length < end) break;
+    const isEnd = bytes[offset + 4] === 73 && bytes[offset + 5] === 69 && bytes[offset + 6] === 78 && bytes[offset + 7] === 68;
+    offset = end;
+    if (isEnd) return bytes.subarray(offset);
+  }
+  throw new Error("Incomplete PNG wrapper");
 }
 
 function responseHeaders(source, type) {
@@ -108,6 +73,65 @@ function responseHeaders(source, type) {
   headers.set("Content-Type", type);
   return headers;
 }
+
+function transientStatus(status) {
+  return status === 408 || status === 429 || status >= 500;
+}
+
+function cdnCandidate(target, attempt) {
+  const url = new URL(target);
+  const current = Number(url.hostname.match(/^cdn(\d+)\./)[1]);
+  url.hostname = `cdn${((current - 1 + attempt) % 7) + 1}.nonprofit.asia`;
+  return url;
+}
+
+function proxyLog(event, stage, url, attempt, detail) {
+  const data = { event, stage, host: url.hostname, attempt: attempt + 1 };
+  if (typeof detail === "number") data.status = detail;
+  else data.error = detail && detail.name ? detail.name : "Error";
+  console[event === "anime47_proxy_failure" ? "error" : "warn"](JSON.stringify(data));
+}
+
+async function segmentResponse(target) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const url = cdnCandidate(target, attempt);
+    let stage = "upstream-fetch";
+    try {
+      const source = await upstream(url);
+      if (!source.ok) {
+        if (transientStatus(source.status) && attempt < 2) {
+          proxyLog("anime47_proxy_retry", "upstream-status", url, attempt, source.status);
+          if (source.body) await source.body.cancel();
+          continue;
+        }
+        proxyLog("anime47_proxy_failure", "upstream-status", url, attempt, source.status);
+        return new Response(source.body, {
+          status: source.status,
+          headers: responseHeaders(source.headers, source.headers.get("Content-Type") || "application/octet-stream"),
+        });
+      }
+
+      stage = "segment-body";
+      const body = new Uint8Array(await source.arrayBuffer());
+      stage = "segment-unwrap";
+      const bytes = stripPng(body);
+      return new Response(bytes, {
+        status: source.status,
+        headers: responseHeaders(source.headers, "video/mp2t"),
+      });
+    } catch (error) {
+      const retryable = stage !== "segment-unwrap" || error.message === "Incomplete PNG wrapper";
+      if (retryable && attempt < 2) {
+        proxyLog("anime47_proxy_retry", stage, url, attempt, error);
+        continue;
+      }
+      proxyLog("anime47_proxy_failure", stage, url, attempt, error);
+      return new Response("Upstream failed at " + stage, { status: 502, headers: { "Access-Control-Allow-Origin": "*" } });
+    }
+  }
+}
+
+export { stripPng };
 
 export default {
   async fetch(request, env) {
@@ -127,9 +151,13 @@ export default {
       return new Response("Invalid upstream URL", { status: 400 });
     }
 
+    if (request.method === "GET" && /^cdn\d+\.nonprofit\.asia$/.test(target.hostname)) return segmentResponse(target);
+
+    let stage = "upstream-fetch";
     try {
       const source = await upstream(target);
       if (!source.ok || request.method === "HEAD") {
+        if (!source.ok) console.error(JSON.stringify({ event: "anime47_proxy_failure", stage: "upstream-status", host: target.hostname, status: source.status }));
         return new Response(request.method === "HEAD" ? null : source.body, {
           status: source.status,
           headers: responseHeaders(source.headers, source.headers.get("Content-Type") || "application/octet-stream"),
@@ -138,6 +166,7 @@ export default {
 
       const type = source.headers.get("Content-Type") || "";
       if (/mpegurl/i.test(type) || target.hostname === "pl.vlogphim.net") {
+        stage = "playlist-body";
         const text = await source.text();
         if (text.includes("#EXTM3U")) {
           return new Response(rewritePlaylist(text, target, request.url), {
@@ -147,12 +176,19 @@ export default {
         }
       }
 
-      return new Response(source.body.pipeThrough(pngStripper()), {
+      // Native buffering avoids spending the 10 ms free-plan CPU budget on a
+      // JavaScript transform callback for every streamed network chunk.
+      stage = "segment-body";
+      const body = new Uint8Array(await source.arrayBuffer());
+      stage = "segment-unwrap";
+      const bytes = stripPng(body);
+      return new Response(bytes, {
         status: source.status,
         headers: responseHeaders(source.headers, "video/mp2t"),
       });
     } catch (error) {
-      return new Response("Upstream failed: " + error.message, { status: 502, headers: { "Access-Control-Allow-Origin": "*" } });
+      console.error(JSON.stringify({ event: "anime47_proxy_failure", stage, host: target.hostname, error: error && error.name ? error.name : "Error" }));
+      return new Response("Upstream failed at " + stage, { status: 502, headers: { "Access-Control-Allow-Origin": "*" } });
     }
   },
 };

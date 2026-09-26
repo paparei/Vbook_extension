@@ -124,7 +124,7 @@ function execute(data) {
 
     function proxyTarget(url) {
         var proxy = configText('a47_proxy_url');
-        if (!/^https:\/\//i.test(proxy)) return '';
+        if (!/^https:\/\//i.test(proxy)) proxy = 'https://anime47-vbook-proxy.rainy-ixia.workers.dev';
         var queryAt = proxy.indexOf('?');
         var query = queryAt === -1 ? '' : proxy.substring(queryAt);
         proxy = (queryAt === -1 ? proxy : proxy.substring(0, queryAt)).replace(/\/+$/, '');
@@ -132,8 +132,8 @@ function execute(data) {
     }
 
     // VlogPhim's master URL has no extension, but its variant accepts .m3u8.
-    // ponytail: direct fallback still relies on Media3 parsing PNG-wrapped TS;
-    // deploy/configure proxy-worker.mjs to remove that ceiling.
+    // ponytail: VBook has no segment-transform hook; use the managed Worker
+    // until Media3 can remove VlogPhim's PNG wrapper locally.
     function resolveVariant(masterUrl) {
         try {
             var res = fetch(masterUrl, { method: 'GET', headers: headers, timeout: 15000 });
@@ -150,9 +150,6 @@ function execute(data) {
     }
 
     if (isVlogPhim(streamUrl)) {
-        if (!/^https:\/\//i.test(configText('a47_proxy_url'))) {
-            return Response.error('Hãy cấu hình URL proxy riêng trong cài đặt Anime47');
-        }
         // VBook aborts extensionless proxy masters before loading their child
         // rendition. Return one explicit media-playlist URL instead.
         var vlogVariant = resolveVariant(streamUrl);

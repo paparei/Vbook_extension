@@ -3,10 +3,14 @@ var API_URL = 'https://anime47.love/api';
 
 var UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
 
-// plugin.json.config keys are injected as globals by VBook: a47_email, a47_password
+// VBook Android historically exposed config keys as globals; iOS follows localConfig.
 function configText(name) {
     try {
-        var raw = this[name];
+        var raw = '';
+        if (typeof localConfig !== 'undefined' && localConfig && localConfig.getItem) {
+            raw = localConfig.getItem(name);
+        }
+        if (raw === undefined || raw === null || raw === '') raw = this[name];
         raw = raw === undefined || raw === null ? '' : String(raw);
         return raw.replace(/"/g, '').trim();
     } catch (e) {

@@ -17,7 +17,7 @@ Kho extension cho ứng dụng [vBook](https://vbook.app).
 | Tên | Loại | Nguồn | Phiên bản |
 | --- | --- | --- | --- |
 | **MangaDex** | Comic | `https://mangadex.org` | v4 |
-| **Anime47** | Video | `https://anime47.best` | v24 |
+| **Anime47** | Video | `https://anime47.best` | v26 |
 | **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **AnimePahe** | Video | `https://animepahe.ch` | v1 |
 | **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
