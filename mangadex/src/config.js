@@ -7,6 +7,8 @@ var LANGUAGE = 'vi,en';
 var CONTENT_RATINGS = ['safe', 'suggestive', 'erotica'];
 var lastApiError = '';
 
+var lastApiRequestAt = 0;
+
 try {
     if (md_languages) LANGUAGE = String(md_languages);
 } catch (e) {}
@@ -34,22 +36,23 @@ function buildQuery(pairs) {
 }
 
 function isTransientStatus(status) {
-    return !status || status === 429 || status >= 500;
+    return !status || status === 408 || status === 429 || (status >= 500 && status < 600);
 }
 
 function cacheKey(url) {
     return 'md_api:' + url;
 }
 
-function readApiCache(url) {
-    // ponytail: 24-hour per-URL fallback; add LRU eviction only if storage pressure appears.
+function readApiCache(url, maxAge) {
+    // ponytail: per-URL expiry; add LRU eviction only if storage pressure appears.
     try {
         var cached = JSON.parse(localStorage.getItem(cacheKey(url)) || 'null');
-        if (!cached || !cached.time || new Date().getTime() - cached.time > 86400000) {
+        var age = cached ? new Date().getTime() - cached.time : -1;
+        if (!cached || !cached.time || !isFinite(age) || age < 0 || age >= maxAge) {
             localStorage.removeItem(cacheKey(url));
             return null;
         }
-        return cached.data || null;
+        return cached.data ? cached : null;
     } catch (error) {
         return null;
     }
@@ -61,22 +64,49 @@ function writeApiCache(url, data) {
     } catch (error) {}
 }
 
+function retryDelay(response) {
+    var delay = 1500 + Math.floor(Math.random() * 500);
+    try {
+        var retry = String(response.header('Retry-After') || '');
+        var reset = Number(response.header('X-RateLimit-Retry-After')) * 1000;
+        var now = new Date().getTime();
+        if (retry) {
+            var wait = /^\d+$/.test(retry) ? Number(retry) * 1000 : Date.parse(retry) - now;
+            if (isFinite(wait)) delay = Math.max(delay, wait);
+        }
+        if (isFinite(reset)) delay = Math.max(delay, reset - now);
+    } catch (error) {}
+    return delay;
+}
+
 function apiRequest(path, pairs) {
     var url = API_URL + path;
     var query = buildQuery(pairs || []);
     if (query) url += '?' + query;
 
-    var cacheable = path.indexOf('/at-home/server/') !== 0;
+    // At-home URLs are temporary: never use the metadata cache's 24-hour fallback.
+    var atHome = path.indexOf('/at-home/server/') === 0;
+    var maxAge = atHome ? 300000 : 86400000;
+    var cached = readApiCache(url, maxAge);
     lastApiError = '';
-    for (var attempt = 0; attempt < 3; attempt++) {
+    if (cached && new Date().getTime() - cached.time < 60000) return cached.data;
+
+    // ponytail: two attempts within 28 seconds; no proxy can repair an upstream outage.
+    var deadline = new Date().getTime() + 28000;
+    for (var attempt = 0; attempt < 2; attempt++) {
+        var pause = 250 - (new Date().getTime() - lastApiRequestAt);
+        if (pause > 0) sleep(pause);
+        var remaining = deadline - new Date().getTime();
+        if (remaining <= 0) break;
         var response = null;
         try {
+            lastApiRequestAt = new Date().getTime();
             response = fetch(url, {
                 headers: {
                     'Accept': 'application/json',
-                    'User-Agent': 'VBook-MangaDex/4.0'
+                    'User-Agent': 'VBook-MangaDex/5.0'
                 },
-                timeout: 20000
+                timeout: Math.min(12000, remaining)
             });
         } catch (error) {
             lastApiError = 'network error';
@@ -86,27 +116,39 @@ function apiRequest(path, pairs) {
             try {
                 var body = response.text ? response.text() : '';
                 var data = body ? JSON.parse(body) : (response.json ? response.json() : null);
-                if (!data) {
-                    lastApiError = 'empty response';
-                    return null;
+                var valid = data && data.result === 'ok' && (atHome
+                    ? /^https:\/\//i.test(String(data.baseUrl || '')) && data.chapter && data.chapter.hash && Array.isArray(data.chapter.data)
+                    : data.data && typeof data.data === 'object');
+                if (valid) {
+                    writeApiCache(url, data);
+                    lastApiError = '';
+                    return data;
                 }
-                if (cacheable) writeApiCache(url, data);
-                return data;
+                lastApiError = 'invalid API response';
             } catch (error) {
                 lastApiError = 'invalid JSON';
-                return null;
             }
+        } else {
+            var status = response ? Number(response.status) || 0 : 0;
+            lastApiError = status ? 'HTTP ' + status : 'network error';
+            if (!isTransientStatus(status)) return null;
         }
 
-        var status = response && response.status ? response.status : 0;
-        lastApiError = status ? 'HTTP ' + status : 'network error';
-        if (!isTransientStatus(status)) return null;
-        if (attempt < 2) sleep(500 * (attempt + 1));
+        cached = readApiCache(url, maxAge);
+        if (cached) {
+            lastApiError = '';
+            return cached.data;
+        }
+        if (attempt === 0) {
+            var delay = retryDelay(response);
+            if (delay + 1000 >= deadline - new Date().getTime()) {
+                lastApiError += '; retry later';
+                break;
+            }
+            sleep(delay);
+        }
     }
-
-    var cached = cacheable ? readApiCache(url) : null;
-    if (cached) lastApiError = '';
-    return cached;
+    return null;
 }
 
 function apiError(message) {

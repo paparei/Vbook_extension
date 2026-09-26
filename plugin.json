@@ -9,10 +9,10 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/plugin.json",
-      "version": 4,
+      "version": 5,
       "source": "https://mangadex.org",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/icon.png",
-      "description": "Đọc manga đa ngôn ngữ trên MangaDex",
+      "description": "Đọc manga đa ngôn ngữ trên MangaDex. Giảm lỗi 504 bằng bộ nhớ đệm và thử lại có giới hạn. Dữ liệu danh sách có thể cũ tối đa 24 giờ khi API lỗi; nếu vẫn lỗi, thử lại sau hoặc đổi mạng/VPN.",
       "type": "comic",
       "locale": "global"
     },
