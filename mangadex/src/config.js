@@ -64,21 +64,6 @@ function writeApiCache(url, data) {
     } catch (error) {}
 }
 
-function retryDelay(response) {
-    var delay = 1500 + Math.floor(Math.random() * 500);
-    try {
-        var retry = String(response.header('Retry-After') || '');
-        var reset = Number(response.header('X-RateLimit-Retry-After')) * 1000;
-        var now = new Date().getTime();
-        if (retry) {
-            var wait = /^\d+$/.test(retry) ? Number(retry) * 1000 : Date.parse(retry) - now;
-            if (isFinite(wait)) delay = Math.max(delay, wait);
-        }
-        if (isFinite(reset)) delay = Math.max(delay, reset - now);
-    } catch (error) {}
-    return delay;
-}
-
 function apiRequest(path, pairs) {
     var url = API_URL + path;
     var query = buildQuery(pairs || []);
@@ -91,9 +76,9 @@ function apiRequest(path, pairs) {
     lastApiError = '';
     if (cached && new Date().getTime() - cached.time < 60000) return cached.data;
 
-    // ponytail: two attempts within 28 seconds; no proxy can repair an upstream outage.
-    var deadline = new Date().getTime() + 28000;
-    for (var attempt = 0; attempt < 2; attempt++) {
+    // ponytail: one diagnostic attempt; revisit retries after on-device results.
+    var deadline = new Date().getTime() + 30000;
+    for (var attempt = 0; attempt < 1; attempt++) {
         var pause = 250 - (new Date().getTime() - lastApiRequestAt);
         if (pause > 0) sleep(pause);
         var remaining = deadline - new Date().getTime();
@@ -104,13 +89,20 @@ function apiRequest(path, pairs) {
             response = fetch(url, {
                 headers: {
                     'Accept': 'application/json',
-                    'User-Agent': 'VBook-MangaDex/5.0'
+                    'User-Agent': 'VBook-MangaDex/6.0'
                 },
-                timeout: Math.min(12000, remaining)
+                timeout: 30000
             });
         } catch (error) {
             lastApiError = 'network error';
         }
+
+        try {
+            console.log('[MangaDex diagnostic] path=' + path + ' attempt=' + (attempt + 1)
+                + ' status=' + (response ? response.status : 'no response')
+                + ' elapsedMs=' + (new Date().getTime() - lastApiRequestAt)
+                + ' timeoutMs=30000');
+        } catch (logError) {}
 
         if (response && response.ok) {
             try {
@@ -131,7 +123,7 @@ function apiRequest(path, pairs) {
         } else {
             var status = response ? Number(response.status) || 0 : 0;
             lastApiError = status ? 'HTTP ' + status : 'network error';
-            if (!isTransientStatus(status)) return null;
+            if (!isTransientStatus(status)) break;
         }
 
         cached = readApiCache(url, maxAge);
@@ -139,15 +131,8 @@ function apiRequest(path, pairs) {
             lastApiError = '';
             return cached.data;
         }
-        if (attempt === 0) {
-            var delay = retryDelay(response);
-            if (delay + 1000 >= deadline - new Date().getTime()) {
-                lastApiError += '; retry later';
-                break;
-            }
-            sleep(delay);
-        }
     }
+    lastApiError += ' [v6; ' + (new Date().getTime() - lastApiRequestAt) + ' ms; timeout 30000 ms; ' + path + ']';
     return null;
 }
 

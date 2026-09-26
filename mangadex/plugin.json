@@ -2,10 +2,10 @@
   "metadata": {
     "name": "MangaDex",
     "author": "paparei",
-    "version": 5,
+    "version": 6,
     "source": "https://mangadex.org",
     "regexp": "https?://(www\\.)?mangadex\\.org/(title|chapter)/[0-9a-fA-F-]{36}.*",
-    "description": "Đọc manga đa ngôn ngữ trên MangaDex. Giảm lỗi 504 bằng bộ nhớ đệm và thử lại có giới hạn. Dữ liệu danh sách có thể cũ tối đa 24 giờ khi API lỗi; nếu vẫn lỗi, thử lại sau hoặc đổi mạng/VPN.",
+    "description": "Đọc manga đa ngôn ngữ trên MangaDex. Giảm lỗi 504 bằng bộ nhớ đệm và thử lại có giới hạn. Dữ liệu danh sách có thể cũ tối đa 24 giờ khi API lỗi; nếu vẫn lỗi, thử lại sau hoặc đổi mạng/VPN. Diagnostic v6: one 30-second request; failures show elapsed time.",
     "locale": "global",
     "language": "javascript",
     "type": "comic"
