@@ -29,18 +29,6 @@
       "locale": "vi_VN"
     },
     {
-      "name": "AnimeVsub",
-      "author": "kychi",
-      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animevsub/plugin.zip",
-      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animevsub/plugin.json",
-      "version": 1,
-      "source": "https://animevsub.app",
-      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animevsub/icon.png",
-      "description": "Xem anime Vietsub HD miễn phí trên AnimeVsub - kho anime lớn nhất",
-      "type": "video",
-      "locale": "vi_VN"
-    },
-    {
       "name": "AnimePahe",
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animepahe/plugin.zip",
@@ -51,18 +39,6 @@
       "description": "Watch anime online in HD with English subtitles on AnimePahe.",
       "type": "video",
       "locale": "en_US"
-    },
-    {
-      "name": "Anime Hay",
-      "author": "kychi",
-      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/plugin.zip",
-      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/plugin.json",
-      "version": 2,
-      "source": "https://animevietsub.gg",
-      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/animehay/icon.png",
-      "description": "Xem Anime Hay - miễn phí chất lượng cao với phụ đề Tiếng Việt, Thuyết Minh, Lồng Tiếng (animehay.fm đã chuyển sang animevietsub.gg)",
-      "type": "video",
-      "locale": "vi_VN"
     },
     {
       "name": "PhimTV",
@@ -87,54 +63,6 @@
       "description": "Read English comics from BatCave. Open Source page and sign in if authentication is required.",
       "type": "comic",
       "locale": "en_US"
-    },
-    {
-      "name": "Dilib Truyện Tranh",
-      "author": "paparei",
-      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib/plugin.zip",
-      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib/plugin.json",
-      "version": 3,
-      "source": "https://dilib.vn",
-      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib/icon.png",
-      "description": "Đọc truyện tranh tiếng Việt trên Dilib. Tập trung vào Manga, Manhua, Manhwa và các thể loại truyện tranh phổ biến.",
-      "type": "comic",
-      "locale": "vi_VN"
-    },
-    {
-      "name": "Dilib Sách Nói & Radio",
-      "author": "paparei",
-      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-audio/plugin.zip",
-      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-audio/plugin.json",
-      "version": 3,
-      "source": "https://dilib.vn",
-      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-audio/icon.png",
-      "description": "Nghe sách nói và radio tiếng Việt trên Dilib qua trình phát media VBook.",
-      "type": "audio",
-      "locale": "vi_VN"
-    },
-    {
-      "name": "Dilib Sách Điện Tử",
-      "author": "paparei",
-      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/plugin.zip",
-      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/plugin.json",
-      "version": 3,
-      "source": "https://dilib.vn",
-      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/dilib-ebook/icon.png",
-      "description": "Đọc EPUB tiếng Việt từ Dilib bằng trình đọc văn bản VBook, hỗ trợ TTS và lưu vị trí đọc.",
-      "type": "novel",
-      "locale": "vi_VN"
-    },
-    {
-      "name": "OpenAI Compatible Translate",
-      "author": "paparei",
-      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/plugin.zip",
-      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/plugin.json",
-      "version": 1,
-      "source": "https://ai.lts.asia/v1",
-      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/openai-translate/icon.png",
-      "description": "Translate through 9router's OpenAI-compatible API. Configure your API key and exact 9router model; the endpoint defaults to https://ai.lts.asia/v1.",
-      "type": "translate",
-      "locale": "global"
     }
   ]
 }

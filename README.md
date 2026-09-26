@@ -18,15 +18,9 @@ Kho extension cho ứng dụng [vBook](https://vbook.app).
 | --- | --- | --- | --- |
 | **MangaDex** | Comic | `https://mangadex.org` | v4 |
 | **Anime47** | Video | `https://anime47.best` | v26 |
-| **AnimeVsub** | Video | `https://animevsub.app` | v1 |
 | **AnimePahe** | Video | `https://animepahe.ch` | v1 |
-| **Anime Hay** | Video | `https://animevietsub.gg` | v2 |
 | **PhimTV** | Video | `https://phimtv.cv` | v3 |
 | **BatCave** | Comic | `https://batcave.biz` | v2 |
-| **Dilib Truyện Tranh** | Comic | `https://dilib.vn` | v3 |
-| **Dilib Sách Nói & Radio** | Audio | `https://dilib.vn` | v3 |
-| **Dilib Sách Điện Tử** | Novel (TTS) | `https://dilib.vn` | v3 |
-| **OpenAI Compatible Translate** | Translate | `https://ai.lts.asia/v1` | v1 |
 
 ## Phát triển
 
