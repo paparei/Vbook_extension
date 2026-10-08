@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "name": "Weeb Central",
+    "author": "vBook",
+    "version": 1,
+    "source": "https://weebcentral.com",
+    "description": "English comics from Weeb Central",
+    "locale": "en",
+    "regexp": "(https?://)?(www\\.)?weebcentral\\.com/series/[0-9A-Z]{26}(/[^?#]*)?",
+    "type": "comic",
+    "nsfw": false
+  },
+  "script": {
+    "home": "home.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "DOMAIN": {
+      "title": "Domain",
+      "default": "https://weebcentral.com",
+      "mode": "input"
+    }
+  }
+}

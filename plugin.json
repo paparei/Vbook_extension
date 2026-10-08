@@ -5,6 +5,18 @@
   },
   "data": [
     {
+      "name": "Weeb Central",
+      "author": "vBook",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/weebcentral/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/weebcentral/plugin.json",
+      "version": 1,
+      "source": "https://weebcentral.com",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/weebcentral/icon.png",
+      "description": "English comics from Weeb Central",
+      "type": "comic",
+      "locale": "en"
+    },
+    {
       "name": "MangaDex",
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/mangadex/plugin.zip",
