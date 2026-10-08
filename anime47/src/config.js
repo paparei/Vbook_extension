@@ -12,7 +12,7 @@ function configText(name) {
         }
         if (raw === undefined || raw === null || raw === '') raw = this[name];
         raw = raw === undefined || raw === null ? '' : String(raw);
-        return raw.replace(/"/g, '').trim();
+        return name === 'a47_email' || name === 'a47_password' ? raw : raw.trim();
     } catch (e) {
         return '';
     }
@@ -42,7 +42,7 @@ function postJson(url, body) {
             timeout: 15000
         });
     } catch (e) { return null; }
-    if (!res || !res.text) return null;
+    if (!res || !res.ok || !res.text) return null;
     try { return JSON.parse(res.text()); } catch (e) { return null; }
 }
 
@@ -100,12 +100,12 @@ function fetchApi(url, withAuth) {
 
 function fetchJson(url, withAuth) {
     var res = fetchApi(url, withAuth);
-    if (withAuth !== false && (!res || !res.ok)) {
-        // expired token (PRIVATE_MODE 401) or network hiccup: drop cache, re-login/refresh once
+    if (withAuth !== false && res && Number(res.status) === 401) {
+        // Only an authentication rejection invalidates the cached access token.
         storageSet('a47_token', '');
         res = fetchApi(url, withAuth);
     }
-    if (!res || !res.text) return null;
+    if (!res || !res.ok || !res.text) return null;
     try { return JSON.parse(res.text()); } catch (e) { return null; }
 }
 
@@ -161,7 +161,7 @@ function toItem(it) {
     return {
         name: name,
         link: normalizeUrl(link),
-        cover: (it.poster || it.image || it.poster_url || it.thumbnail || '') + '',
+        cover: (it.poster || it.image || it.posterUrl || it.poster_url || it.thumbnail || '') + '',
         description: ep || (it.status || it.type || '') + '',
         host: BASE_URL
     };

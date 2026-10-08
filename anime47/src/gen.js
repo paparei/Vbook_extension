@@ -25,7 +25,7 @@ function fromFilter(query, page) {
         var item = toItem(posts[i]);
         if (item) list.push(item);
     }
-    var nextPage = null;
+    var nextPage = '';
     var pag = data && data.pagination ? data.pagination : null;
     if (pag && pag.current_page && pag.last_page && pag.current_page < pag.last_page) {
         nextPage = String(page + 1);
@@ -37,22 +37,24 @@ function execute(url, page) {
     page = parseInt(page, 10) || 1;
     var input = (url || '') + '';
 
-    // Home widgets served from homepage SSR (page 1 only)
+    // Home widgets now come from the API, not homepage SSR.
     var ssrKey = '';
     if (input === 'trending') ssrKey = 'trending-carousel';
     else if (input === 'top-airing') ssrKey = 'top-airing';
     else if (input === 'latest-completed') ssrKey = 'latest-completed';
-    if (ssrKey && page === 1) {
-        var state = extractInitialState(fetchHtml(BASE_URL + '/'));
-        var data = findQueryData(state, ssrKey);
+    if (ssrKey) {
+        if (page > 1) return Response.success([], '');
+        var json = fetchJson(API_URL + '/home-page/' + ssrKey, false);
+        var data = json && json.data ? json.data : json;
         if (data && data.length) {
             var items = [];
             for (var i = 0; i < data.length; i++) {
                 var it = toItem(data[i]);
                 if (it) items.push(it);
             }
-            if (items.length) return Response.success(items, null);
+            if (items.length) return Response.success(items, '');
         }
+        return Response.error('Cannot load home section');
     }
 
     if (input === 'latest-episodes') return fromFilter('sort=latest', page);

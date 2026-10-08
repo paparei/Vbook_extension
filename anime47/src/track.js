@@ -7,6 +7,7 @@ function execute(data) {
     var rawSubs = [];
     try {
         obj = JSON.parse(data);
+        if (!obj || typeof obj !== 'object') return Response.error('Invalid playback data');
         streamUrl = obj.url || '';
         kind = obj.type || '';
         rawSubs = obj.subs || []; // legacy handles created before v21

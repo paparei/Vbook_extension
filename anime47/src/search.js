@@ -3,7 +3,7 @@ load('config.js');
 function execute(key, page) {
     page = parseInt(page, 10) || 1;
     var list = [];
-    var nextPage = null;
+    var nextPage = '';
 
     var json = fetchJson(API_URL + '/search/full/?keyword=' + encodeURIComponent(key) + '&page=' + page, false);
     var results = json && json.results ? json.results : [];
