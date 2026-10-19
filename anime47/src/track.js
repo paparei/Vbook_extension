@@ -7,7 +7,7 @@ function execute(data) {
     var rawSubs = [];
     try {
         obj = JSON.parse(data);
-        if (!obj || typeof obj !== 'object') return Response.error('Invalid playback data');
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return Response.error('Invalid playback data');
         streamUrl = obj.url || '';
         kind = obj.type || '';
         rawSubs = obj.subs || []; // legacy handles created before v21
@@ -21,17 +21,20 @@ function execute(data) {
 
     // Chapter results may be cached longer than Anime47's signed VTT URLs. Resolve
     // the stable episode/server handle again immediately before playback.
-    if (obj.episodeId) {
+    if (obj.episodeId && kind !== 'page') {
+        if (!/^\d+$/.test(String(obj.episodeId))) return Response.error('Mã tập phim không hợp lệ');
         var fresh = fetchJson(API_URL + '/anime/watch/episode/' + obj.episodeId, true);
-        var freshData = fresh ? (fresh.data || fresh) : null;
+        if (!fresh) return Response.error('Không tải được luồng phát mới (kiểm tra đăng nhập và kết nối)');
+        var freshData = fresh.data || fresh;
         var episode = freshData && freshData.episode ? freshData.episode : freshData;
-        var streams = episode && episode.streams ? episode.streams : [];
+        var streams = episode && Array.isArray(episode.streams) ? episode.streams : [];
         var selected = null;
         var index = parseInt(obj.streamIndex, 10);
         if (index >= 0 && index < streams.length) selected = streams[index];
         if (obj.server && (!selected || titleOf(selected, index) !== obj.server)) {
+            selected = null;
             for (var sm = 0; sm < streams.length; sm++) {
-                if (titleOf(streams[sm], sm) === obj.server) {
+                if (streams[sm] && titleOf(streams[sm], sm) === obj.server) {
                     selected = streams[sm];
                     break;
                 }
@@ -40,6 +43,8 @@ function execute(data) {
         if (selected && selected.url) {
             streamUrl = selected.url + '';
             kind = (selected.player_type || 'hls') + '';
+        } else if (kind !== 'page') {
+            return Response.error('Máy chủ đã chọn không còn luồng phát');
         }
 
         rawSubs = [];
@@ -55,9 +60,12 @@ function execute(data) {
         }
     }
     if (!streamUrl) return Response.error('Không có luồng phát');
+    if (typeof streamUrl !== 'string' || !/^https?:\/\/[^\s\/@?#\\]+(?:[\/?#][^\s\\]*)?$/i.test(streamUrl)) {
+        return Response.error('URL luồng phát không hợp lệ');
+    }
+    if (!Array.isArray(rawSubs)) rawSubs = [];
 
-    // Direct VlogPhim segments require these headers. A configured proxy applies
-    // them upstream and harmlessly ignores them from the player.
+    // These headers also apply to direct playlist and segment requests.
     var headers = {
         'User-Agent': UA,
         'Referer': BASE_URL + '/',
@@ -102,7 +110,7 @@ function execute(data) {
         return Response.success({
             data: url,
             type: 'native',
-            mimeType: 'application/x-mpegURL',
+            mimeType: /\.mp4(?:[?#]|$)/i.test(url) ? 'video/mp4' : 'application/x-mpegURL',
             headers: headers,
             host: BASE_URL,
             timeSkip: [],
@@ -113,7 +121,9 @@ function execute(data) {
     }
 
     function absolute(url, base) {
-        if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) return url;
+        if (/^https?:\/\//i.test(url)) return url;
+        if (url.indexOf('//') === 0) return base.split(':')[0] + ':' + url;
+        base = base.split(/[?#]/)[0];
         var origin = base.match(/^https?:\/\/[^\/]+/);
         if (url.charAt(0) === '/') return (origin ? origin[0] : '') + url;
         return base.substring(0, base.lastIndexOf('/') + 1) + url;
@@ -125,47 +135,53 @@ function execute(data) {
 
     function proxyTarget(url) {
         var proxy = configText('a47_proxy_url');
-        if (!/^https:\/\//i.test(proxy)) proxy = 'https://anime47-vbook-proxy.rainy-ixia.workers.dev';
+        if (!/^https:\/\/[^\s\/@?#\\]+(?:[\/?][^\s#\\]*)?$/i.test(proxy)) return '';
         var queryAt = proxy.indexOf('?');
         var query = queryAt === -1 ? '' : proxy.substring(queryAt);
         proxy = (queryAt === -1 ? proxy : proxy.substring(0, queryAt)).replace(/\/+$/, '');
         return proxy + '/playlist.m3u8' + query + (query ? '&' : '?') + 'url=' + encodeURIComponent(url);
     }
 
-    // VlogPhim's master URL has no extension, but its variant accepts .m3u8.
-    // ponytail: VBook has no segment-transform hook; use the managed Worker
-    // until Media3 can remove VlogPhim's PNG wrapper locally.
+    function mediaPlaylistUrl(url) {
+        var match = url.match(/^(https:\/\/pl\.vlogphim\.net\/m3u8\/[^?#]+)([?#].*)?$/i);
+        if (!match) return url;
+        return match[1] + (/\.m3u8$/i.test(match[1]) ? '' : '.m3u8') + (match[2] || '');
+    }
+
+    // Resolve only a master playlist; never mistake its first media segment for a variant.
     function resolveVariant(masterUrl) {
         try {
             var res = fetch(masterUrl, { method: 'GET', headers: headers, timeout: 15000 });
             if (!res || !res.ok || !res.text) return '';
             var text = res.text() || '';
             if (text.indexOf('#EXTM3U') === -1) return '';
+            if (text.indexOf('#EXT-X-MEDIA:') !== -1) return masterUrl;
+            if (text.indexOf('#EXT-X-STREAM-INF:') === -1) return mediaPlaylistUrl(masterUrl);
+            var base = res.url ? String(res.url) : masterUrl;
             var lines = text.split('\n');
+            var variant = false;
             for (var i = 0; i < lines.length; i++) {
                 var line = (lines[i] + '').replace(/^\s+|\s+$/g, '');
-                if (line && line.charAt(0) !== '#') return absolute(line, masterUrl) + '.m3u8';
+                if (line.indexOf('#EXT-X-STREAM-INF:') === 0) variant = true;
+                else if (variant && line && line.charAt(0) !== '#') return mediaPlaylistUrl(absolute(line, base));
             }
         } catch (e) { }
         return '';
     }
 
     if (isVlogPhim(streamUrl)) {
-        // VBook aborts extensionless proxy masters before loading their child
-        // rendition. Return one explicit media-playlist URL instead.
-        var vlogVariant = resolveVariant(streamUrl);
-        var proxied = proxyTarget(vlogVariant || streamUrl);
-        if (proxied) return native(proxied);
+        var direct = resolveVariant(streamUrl) || streamUrl;
+        var proxied = proxyTarget(direct);
+        // ponytail: native decoding depends on the player; configure a proxy only if PNG-wrapped segments fail.
+        return native(proxied || direct);
     }
 
-    if (streamUrl.indexOf('.mp4') !== -1 || streamUrl.indexOf('.m3u8') !== -1) return native(streamUrl);
+    if (/\.mp4(?:[?#]|$)/i.test(streamUrl) || /\.m3u8(?:[?#]|$)/i.test(streamUrl)) return native(streamUrl);
 
     if (kind !== 'page') {
         var variant = resolveVariant(streamUrl);
         if (variant) return native(variant);
-        if (kind === 'hls' || kind === 'jwplayer') {
-            return native(streamUrl + (streamUrl.indexOf('?') === -1 ? '?' : '&') + 'f=.m3u8');
-        }
+        if (kind === 'hls' || kind === 'jwplayer') return native(streamUrl);
     }
 
     // Embed/unknown -> let VBook WebView sniff the media.

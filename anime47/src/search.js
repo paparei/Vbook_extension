@@ -6,15 +6,16 @@ function execute(key, page) {
     var nextPage = '';
 
     var json = fetchJson(API_URL + '/search/full/?keyword=' + encodeURIComponent(key) + '&page=' + page, false);
-    var results = json && json.results ? json.results : [];
+    if (!json || !Array.isArray(json.results)) return Response.error('Không tải được kết quả tìm kiếm');
+    var results = json.results;
 
     for (var i = 0; i < results.length; i++) {
         var item = toItem(results[i]);
         if (item) list.push(item);
     }
 
-    if (json && json.total_pages && page < json.total_pages) {
-        nextPage = String(page + 1);
+    if (json.total_pages !== undefined && json.total_pages !== null) {
+        if (page < parseInt(json.total_pages, 10)) nextPage = String(page + 1);
     } else if (results.length >= 24) {
         nextPage = String(page + 1);
     }

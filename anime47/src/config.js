@@ -1,16 +1,20 @@
 var BASE_URL = 'https://anime47.best';
-var API_URL = 'https://anime47.love/api';
+var API_URL = 'https://animevui.com/api';
 
 var UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
 
-// VBook Android historically exposed config keys as globals; iOS follows localConfig.
+// Static settings can be lexical constants rather than global-object properties.
 function configText(name) {
     try {
         var raw = '';
         if (typeof localConfig !== 'undefined' && localConfig && localConfig.getItem) {
             raw = localConfig.getItem(name);
         }
-        if (raw === undefined || raw === null || raw === '') raw = this[name];
+        if (raw === undefined || raw === null || raw === '') {
+            if (name === 'a47_email' && typeof a47_email !== 'undefined') raw = a47_email;
+            else if (name === 'a47_password' && typeof a47_password !== 'undefined') raw = a47_password;
+            else if (name === 'a47_proxy_url' && typeof a47_proxy_url !== 'undefined') raw = a47_proxy_url;
+        }
         raw = raw === undefined || raw === null ? '' : String(raw);
         return name === 'a47_email' || name === 'a47_password' ? raw : raw.trim();
     } catch (e) {
@@ -89,7 +93,7 @@ function fetchApi(url, withAuth) {
         'Origin': BASE_URL,
         'Accept': 'application/json, text/plain, */*'
     };
-    if (withAuth !== false) {
+    if (withAuth !== false && url.indexOf(API_URL + '/') === 0) {
         var token = getAccessToken();
         if (token) headers['Authorization'] = 'Bearer ' + token;
     }

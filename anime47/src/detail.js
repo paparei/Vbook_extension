@@ -54,7 +54,7 @@ function execute(url) {
 
     return Response.success({
         name: d.title + '',
-        author: (d.studios && d.studios.length ? d.studios[0].name : '') + '',
+        author: (d.studios && d.studios.length ? (typeof d.studios[0] === 'string' ? d.studios[0] : d.studios[0].name || '') : '') + '',
         cover: (d.poster || d.image || '') + '',
         description: cleanText(d.description || d.synopsis || ''),
         detail: epInfo + (status ? (' • ' + status) : '') + (d.type ? (' • ' + d.type) : ''),

@@ -19,7 +19,8 @@ function genreIdBySlug(slug) {
 function fromFilter(query, page) {
     var json = fetchJson(API_URL + '/anime/filter?' + query + '&page=' + page, false);
     var data = json && json.data ? json.data : null;
-    var posts = data && data.posts ? data.posts : [];
+    if (!data || !Array.isArray(data.posts)) return Response.error('Không tải được danh sách phim');
+    var posts = data.posts;
     var list = [];
     for (var i = 0; i < posts.length; i++) {
         var item = toItem(posts[i]);
@@ -27,7 +28,7 @@ function fromFilter(query, page) {
     }
     var nextPage = '';
     var pag = data && data.pagination ? data.pagination : null;
-    if (pag && pag.current_page && pag.last_page && pag.current_page < pag.last_page) {
+    if (pag && parseInt(pag.current_page, 10) < parseInt(pag.last_page, 10)) {
         nextPage = String(page + 1);
     }
     return Response.success(list, nextPage);

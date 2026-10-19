@@ -33,10 +33,10 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/plugin.json",
-      "version": 27,
+      "version": 28,
       "source": "https://anime47.best",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/anime47/icon.png",
-      "description": "Xem anime vietsub online tại Anime47. Cần tài khoản để xem; đăng nhập tài khoản Anime47 trong cài đặt để tải dữ liệu.",
+      "description": "Xem anime vietsub tại Anime47. Đăng nhập tài khoản trong cài đặt. Để trống URL proxy để phát trực tiếp. Đã kiểm tra trên Windows; phát video trên iOS/Android chưa được xác minh. Nếu máy không phát được, thử máy chủ khác hoặc cấu hình proxy riêng.",
       "type": "video",
       "locale": "vi_VN"
     },

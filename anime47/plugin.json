@@ -2,10 +2,10 @@
   "metadata": {
     "name": "Anime47",
     "author": "paparei",
-    "version": 27,
+    "version": 28,
     "source": "https://anime47.best",
     "regexp": "https?://(www\\.)?(anime47\\.(best|love|net|com|is)|phimhay123\\..*?)/(phim|xem)/.*",
-    "description": "Xem anime vietsub online tại Anime47. Cần tài khoản để xem; đăng nhập tài khoản Anime47 trong cài đặt để tải dữ liệu.",
+    "description": "Xem anime vietsub tại Anime47. Đăng nhập tài khoản trong cài đặt. Để trống URL proxy để phát trực tiếp. Đã kiểm tra trên Windows; phát video trên iOS/Android chưa được xác minh. Nếu máy không phát được, thử máy chủ khác hoặc cấu hình proxy riêng.",
     "locale": "vi_VN",
     "language": "javascript",
     "type": "video"
@@ -34,7 +34,7 @@
       "default": ""
     },
     "a47_proxy_url": {
-      "title": "URL proxy riêng (không bắt buộc)",
+      "title": "URL proxy riêng (để trống để phát trực tiếp)",
       "mode": "input",
       "format": "text",
       "default": ""
