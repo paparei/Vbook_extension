@@ -5,8 +5,7 @@ function execute(key, page) {
     if (!key) return Response.success([]);
 
     var current = pageNumber(page);
-    var url = BASE_URL + '/index.php?do=search&subaction=search&story=' + encodeURIComponent(key);
-    if (current > 1) url += '&search_start=' + current;
+    var url = pagedUrl(BASE_URL + '/search/' + encodeURIComponent(key) + '/', current);
 
     var response = fetchPage(url);
     var html = responseText(response);

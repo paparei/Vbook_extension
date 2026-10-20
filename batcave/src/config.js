@@ -67,16 +67,52 @@ function fetchPage(url) {
 
     lastPageError = '';
     try {
-        return fetch(url, { headers: headers, timeout: 20000 });
+        var response = fetch(url, { headers: headers, timeout: 20000 });
+        if (response && (response.status === 403 || response.status === 404)) {
+            return browserResponse(url) || response;
+        }
+        return response;
     } catch (error) {
         lastPageError = 'Lỗi kết nối';
         return null;
     }
 }
 
+function browserResponse(url) {
+    var browser;
+    try {
+        browser = Engine.newBrowser();
+        browser.launch(url, 12000);
+        // Windows wraps callJs results in JSON; encoding protects HTML from the bridge's HTML parser.
+        var value = browser.callJs('encodeURIComponent(JSON.stringify({url:location.href,html:document.documentElement.outerHTML}))', 3000);
+        var text = value ? String(value.text ? value.text() : value) : '';
+        if (text.charAt(0) === '"') text = JSON.parse(text);
+        var page = JSON.parse(decodeURIComponent(text));
+        if (!normalizePageUrl(page.url)) return null;
+        var html = page.html;
+        if (!html || !/<html[\s>]/i.test(html)) return null;
+        var doc = Html.parse(html);
+        var title = firstText(doc, 'title');
+        if (!title || /404|not found|just a moment|sign in to keep reading|unauthorized/i.test(title) || /cf-chl-|showTs\(|function runModern\(/.test(html)) return null;
+        return {
+            ok: true,
+            status: 200,
+            url: url,
+            text: function () { return html; },
+            html: function () { return Html.parse(html); }
+        };
+    } catch (error) {
+        return null;
+    } finally {
+        if (browser) {
+            try { browser.close(); } catch (error) {}
+        }
+    }
+}
+
 function responseText(response) {
     try {
-        return response && response.text ? String(response.text() || '') : '';
+        return response && response.ok && response.text ? String(response.text() || '') : '';
     } catch (error) {
         lastPageError = 'Không đọc được phản hồi';
         return '';
@@ -92,7 +128,7 @@ function pageResponseError(response, html, action) {
         return Response.error('BatCave đang yêu cầu xác thực/Cloudflare. Hãy mở Source page trong vBook và đăng nhập.');
     }
     if (status === 404) {
-        return Response.error('BatCave trả về HTTP 404. Cookie có thể đã hết hạn; hãy mở Source page và làm mới/đăng nhập lại. Nếu chỉ một truyện lỗi, truyện có thể đã bị xóa.');
+        return Response.error('BatCave trả về HTTP 404. Trang không khả dụng; phản hồi này không xác nhận lỗi cookie hay đăng nhập.');
     }
     if (!response.ok) return Response.error('Không thể ' + action + (status ? ' (HTTP ' + status + ')' : ''));
     if (!html) return Response.error('BatCave trả về trang trống');

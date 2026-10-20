@@ -20,7 +20,7 @@ Kho extension cho ứng dụng [vBook](https://vbook.app).
 | **Anime47** | Video | `https://anime47.best` | v28 |
 | **AnimePahe** | Video | `https://animepahe.ch` | v1 |
 | **PhimTV** | Video | `https://phimtv.cv` | v3 |
-| **BatCave** | Comic | `https://batcave.biz` | v2 |
+| **BatCave** | Comic | `https://batcave.biz` | v4 |
 
 ## Phát triển
 
