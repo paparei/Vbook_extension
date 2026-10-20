@@ -88,12 +88,12 @@ function browserResponse(url) {
         var text = value ? String(value.text ? value.text() : value) : '';
         if (text.charAt(0) === '"') text = JSON.parse(text);
         var page = JSON.parse(decodeURIComponent(text));
-        if (!normalizePageUrl(page.url)) return null;
+        if (!/^https?:\/\//i.test(page.url) || !normalizePageUrl(page.url)) return null;
         var html = page.html;
         if (!html || !/<html[\s>]/i.test(html)) return null;
         var doc = Html.parse(html);
         var title = firstText(doc, 'title');
-        if (!title || /404|not found|just a moment|sign in to keep reading|unauthorized/i.test(title) || /cf-chl-|showTs\(|function runModern\(/.test(html)) return null;
+        if (!title || /^(?:(?:error\s+)?404(?:\s*[-:|]?\s*(?:not found|page not found))?$|(?:page )?not found\b|just a moment\b|sign in to keep reading\b|(?:401\s+)?unauthorized\b)/i.test(title) || /cf-chl-|showTs\(|function runModern\(|window\._cf_chl_opt|Cloudflare Ray ID/i.test(html)) return null;
         return {
             ok: true,
             status: 200,
