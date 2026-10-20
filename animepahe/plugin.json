@@ -2,11 +2,11 @@
   "metadata": {
     "name": "AnimePahe",
     "author": "paparei",
-    "version": 5,
+    "version": 7,
     "source": "https://animepahe.ch",
     "description": "Watch anime online in HD with English subtitles on AnimePahe.",
     "locale": "en_US",
-    "regexp": "(www\\.)?animepahe\\.ch/series/[^/]+/?$",
+    "regexp": "(https?://)?(www\\.)?animepahe\\.ch/series/[^/]+/?$",
     "type": "video",
     "nsfw": false,
     "encrypt": true

@@ -5,6 +5,7 @@ function pagedUrl(url, page) {
     let queryAt = url.indexOf("?");
     let path = queryAt === -1 ? url : url.slice(0, queryAt);
     let query = queryAt === -1 ? "" : url.slice(queryAt);
+    if (/\/series\/?$/.test(path)) return url + (query ? "&" : "?") + "page=" + page;
     return path.replace(/\/+$/, "") + "/page/" + page + "/" + query;
 }
 
@@ -38,7 +39,7 @@ function execute(query, page) {
         });
     });
 
-    let nextPage = doc.select(".pagination a.next.page-numbers").isEmpty()
+    let nextPage = doc.select(".pagination a.next.page-numbers, .hpage a.r").isEmpty()
         ? ""
         : String(parseInt(page, 10) + 1);
     return Response.success(items, nextPage);

@@ -7,10 +7,11 @@ function playback(url, type, referer, subtitles) {
         type: type,
         data: url,
         host: BASE_URL,
-        headers: { "User-Agent": UserAgent.chrome(), "Referer": referer },
+        headers: { "User-Agent": UserAgent.chrome() },
         timeSkip: [],
         subtitles: subtitles
     };
+    if (type !== "auto") result.headers.Referer = referer;
     if (type === "native") {
         result.mimeType = url.indexOf(".mp4") !== -1 ? "video/mp4" : "application/x-mpegURL";
     }
@@ -30,13 +31,13 @@ function directStream(text) {
 function resolveMegaPlay(embed, referer) {
     let page = fetchPage(embed, referer);
     if (!page.ok) return Response.error("MegaPlay unavailable (HTTP " + page.status + ")");
-    let id = page.text().match(/id=['\"]megaplay-player['\"][^>]+data-id=['\"](\d+)['\"]/i);
-    if (!id) return Response.error("MegaPlay source ID not found");
+    let id = String(page.html().select("#megaplay-player").attr("data-id"));
+    if (!/^\d+$/.test(id)) return Response.error("MegaPlay source ID not found");
 
     let origin = embed.match(/^https?:\/\/[^\/]+/i);
     if (!origin) return Response.error("Invalid MegaPlay URL");
     origin = origin[0] + "/";
-    let response = fetch(origin + "stream/getSourcesNew?id=" + id[1], {
+    let response = fetch(origin + "stream/getSourcesNew?id=" + id, {
         headers: {
             "User-Agent": UserAgent.chrome(),
             "Referer": origin,
@@ -52,9 +53,7 @@ function resolveMegaPlay(embed, referer) {
     } catch (error) {
         return Response.error("Invalid MegaPlay response");
     }
-    let stream = data.sources && data.sources.file;
-    if (!stream && data.sources && data.sources.length) stream = data.sources[0].file;
-    if (!/^https?:\/\//i.test(stream || "")) return Response.error("MegaPlay stream not found");
+    if (!data || typeof data !== "object") return Response.error("Invalid MegaPlay response");
 
     let subtitles = [];
     let tracks = data.tracks || [];
@@ -67,6 +66,11 @@ function resolveMegaPlay(embed, referer) {
             language: ""
         });
     }
+    // ponytail: use the site's browser decoder for encrypted sources until a stable direct API exists.
+    if (data.enc) return playback(embed, "auto", referer, subtitles);
+    let source = Array.isArray(data.sources) ? data.sources[0] : data.sources;
+    let stream = typeof source === "string" ? source : source && source.file;
+    if (typeof stream !== "string" || !/^https?:\/\//i.test(stream)) return Response.error("MegaPlay stream not found");
     return playback(stream, "native", origin, subtitles);
 }
 
@@ -77,7 +81,8 @@ function execute(data) {
     } catch (error) {
         return Response.error("Invalid playback data");
     }
-    if (!input.referer || (!input.payload && !input.embed)) return Response.error("Missing playback data");
+    if (!input || typeof input.referer !== "string" || !/^https?:\/\//i.test(input.referer) ||
+        (typeof input.payload !== "string" && typeof input.embed !== "string")) return Response.error("Missing playback data");
 
     let embed = input.embed;
     if (!embed) {
@@ -91,7 +96,9 @@ function execute(data) {
         if (!iframe) return Response.error("Server embed not found");
         embed = iframe[1].split("&" + "amp;").join("&");
     }
+    if (typeof embed !== "string") return Response.error("Invalid server URL");
     if (embed.indexOf("//") === 0) embed = "https:" + embed;
+    if (!/^https?:\/\//i.test(embed)) return Response.error("Invalid server URL");
 
     if (/\.(?:m3u8|mp4)(?:[?#]|$)/i.test(embed)) return playback(embed, "native", input.referer);
     if (/\/\/[^\/]*megaplay\./i.test(embed)) return resolveMegaPlay(embed, input.referer);
