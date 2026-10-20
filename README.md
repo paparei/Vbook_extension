@@ -18,9 +18,15 @@ Kho extension cho ứng dụng [vBook](https://vbook.app).
 | --- | --- | --- | --- |
 | **MangaDex** | Comic | `https://mangadex.org` | v6 |
 | **Anime47** | Video | `https://anime47.best` | v28 |
-| **AnimePahe** | Video | `https://animepahe.ch` | v1 |
+| **AnimePahe** | Video | `https://animepahe.ch` | v8 |
 | **PhimTV** | Video | `https://phimtv.cv` | v3 |
 | **BatCave** | Comic | `https://batcave.biz` | v4 |
+
+### AnimePahe v8
+
+- Sửa lỗi phát MegaPlay: giữ ngữ cảnh giới thiệu từ AnimePahe và lấy luồng HLS để phát trực tiếp trong vBook.
+- Đã kiểm tra tập 3 của **The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life** trên Windows, có phụ đề tiếng Anh. Android/iOS chưa được xác minh.
+- Làm mới danh sách tiện ích và cập nhật **AnimePahe lên v8**; ưu tiên máy chủ **HD 3 (MegaPlay)**. Blogger cũng đã phát được trên Windows; FlixCloud chưa được xác minh.
 
 ## Phát triển
 
