@@ -66,8 +66,29 @@ function resolveMegaPlay(embed, referer) {
             language: ""
         });
     }
-    // ponytail: use the site's browser decoder for encrypted sources until a stable direct API exists.
-    if (data.enc) return playback(embed, "auto", referer, subtitles);
+    if (data.enc) {
+        let browser = Engine.newBrowser();
+        try {
+            browser.setUserAgent(UserAgent.chrome());
+            // MegaPlay rejects direct navigation without the AnimePahe Referer.
+            browser.launch(BASE_URL + "/", 15000);
+            browser.callJs('location.href=' + JSON.stringify(embed) + '; ""', 1000);
+            for (let attempt = 0; attempt < 20; attempt++) {
+                browser.html(1000);
+                let resolved = String(browser.callJs("(function(){try{return String(jwplayer().getPlaylist()[0].sources[0].file||'');}catch(e){return '';}})()", 1000).text());
+                // Windows WebView returns a JSON-quoted string; other engines return plain text.
+                if (resolved.charAt(0) === '"') {
+                    try { resolved = JSON.parse(resolved); } catch (error) { resolved = ""; }
+                }
+                if (typeof resolved === "string" && /^https?:\/\//i.test(resolved)) {
+                    return playback(resolved, "native", origin, subtitles);
+                }
+            }
+            return Response.error("MegaPlay did not return a playable stream. Try another server.");
+        } finally {
+            browser.close();
+        }
+    }
     let source = Array.isArray(data.sources) ? data.sources[0] : data.sources;
     let stream = typeof source === "string" ? source : source && source.file;
     if (typeof stream !== "string" || !/^https?:\/\//i.test(stream)) return Response.error("MegaPlay stream not found");
