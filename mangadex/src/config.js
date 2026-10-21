@@ -64,6 +64,34 @@ function writeApiCache(url, data) {
     } catch (error) {}
 }
 
+function validApiData(data, atHome) {
+    return data && data.result === 'ok' && (atHome
+        ? /^https:\/\//i.test(String(data.baseUrl || '')) && data.chapter && data.chapter.hash && Array.isArray(data.chapter.data)
+        : data.data && typeof data.data === 'object');
+}
+
+function browserApiRequest(url, deadline) {
+    var browser = null;
+    try {
+        var remaining = deadline - new Date().getTime();
+        if (remaining < 2000) return null;
+        browser = Engine.newBrowser();
+        browser.launch(url, Math.min(10000, remaining - 1000));
+        remaining = deadline - new Date().getTime();
+        if (remaining <= 0) return null;
+        var text = String(browser.callJs('document.body.innerText', Math.min(1000, remaining)).text());
+        // Windows WebView may JSON-quote the returned string once.
+        if (text.charAt(0) === '"') text = JSON.parse(text);
+        return JSON.parse(text);
+    } catch (error) {
+        return null;
+    } finally {
+        if (browser) {
+            try { browser.close(); } catch (error) {}
+        }
+    }
+}
+
 function apiRequest(path, pairs) {
     var url = API_URL + path;
     var query = buildQuery(pairs || []);
@@ -76,9 +104,11 @@ function apiRequest(path, pairs) {
     lastApiError = '';
     if (cached && new Date().getTime() - cached.time < 60000) return cached.data;
 
-    // ponytail: one diagnostic attempt; revisit retries after on-device results.
-    var deadline = new Date().getTime() + 30000;
-    for (var attempt = 0; attempt < 1; attempt++) {
+    // ponytail: three attempts within 30 seconds; an extension cannot repair a network outage.
+    var started = new Date().getTime();
+    var deadline = started + 30000;
+    var browserTried = false;
+    for (var attempt = 0; attempt < 3; attempt++) {
         var pause = 250 - (new Date().getTime() - lastApiRequestAt);
         if (pause > 0) sleep(pause);
         var remaining = deadline - new Date().getTime();
@@ -89,29 +119,26 @@ function apiRequest(path, pairs) {
             response = fetch(url, {
                 headers: {
                     'Accept': 'application/json',
-                    'User-Agent': 'VBook-MangaDex/6.0'
+                    'User-Agent': 'VBook-MangaDex/7.0'
                 },
-                timeout: 30000
+                timeout: Math.min(10000, remaining)
             });
         } catch (error) {
             lastApiError = 'network error';
         }
 
         try {
-            console.log('[MangaDex diagnostic] path=' + path + ' attempt=' + (attempt + 1)
+            console.log('[MangaDex] path=' + path + ' attempt=' + (attempt + 1)
                 + ' status=' + (response ? response.status : 'no response')
                 + ' elapsedMs=' + (new Date().getTime() - lastApiRequestAt)
-                + ' timeoutMs=30000');
+                + ' transportError=' + (!response || !response.url));
         } catch (logError) {}
 
         if (response && response.ok) {
             try {
                 var body = response.text ? response.text() : '';
                 var data = body ? JSON.parse(body) : (response.json ? response.json() : null);
-                var valid = data && data.result === 'ok' && (atHome
-                    ? /^https:\/\//i.test(String(data.baseUrl || '')) && data.chapter && data.chapter.hash && Array.isArray(data.chapter.data)
-                    : data.data && typeof data.data === 'object');
-                if (valid) {
+                if (validApiData(data, atHome)) {
                     writeApiCache(url, data);
                     lastApiError = '';
                     return data;
@@ -122,7 +149,9 @@ function apiRequest(path, pairs) {
             }
         } else {
             var status = response ? Number(response.status) || 0 : 0;
-            lastApiError = status ? 'HTTP ' + status : 'network error';
+            // vBook maps DNS/TLS/socket failures to 504 with an empty response URL.
+            lastApiError = !response || (status === 504 && !response.url)
+                ? 'network error (vBook 504)' : 'HTTP ' + status;
             if (!isTransientStatus(status)) break;
         }
 
@@ -131,8 +160,31 @@ function apiRequest(path, pairs) {
             lastApiError = '';
             return cached.data;
         }
+        // Native vBook networking can fail while WebView reaches the same official API.
+        if (!browserTried && (!response || (Number(response.status) === 504 && !response.url))) {
+            browserTried = true;
+            var browserData = browserApiRequest(url, deadline);
+            if (validApiData(browserData, atHome)) {
+                writeApiCache(url, browserData);
+                lastApiError = '';
+                console.log('[MangaDex] recovered via WebView: ' + path);
+                return browserData;
+            }
+        }
+        if (attempt === 2) break;
+        var delay = 1000 * (attempt + 1);
+        try {
+            var retry = String(response.header('Retry-After') || '');
+            var reset = Number(response.header('X-RateLimit-Retry-After')) * 1000;
+            var now = new Date().getTime();
+            var wait = /^\d+$/.test(retry) ? Number(retry) * 1000 : Date.parse(retry) - now;
+            if (isFinite(wait)) delay = Math.max(delay, wait);
+            if (isFinite(reset)) delay = Math.max(delay, reset - now);
+        } catch (error) {}
+        if (delay + 1000 >= deadline - new Date().getTime()) break;
+        sleep(delay);
     }
-    lastApiError += ' [v6; ' + (new Date().getTime() - lastApiRequestAt) + ' ms; timeout 30000 ms; ' + path + ']';
+    lastApiError += ' [v7; ' + (new Date().getTime() - started) + ' ms; ' + path + ']';
     return null;
 }
 
