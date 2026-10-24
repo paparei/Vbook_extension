@@ -75,6 +75,18 @@
       "description": "Read English comics from BatCave. Open Source page and sign in if authentication is required.",
       "type": "comic",
       "locale": "en_US"
+    },
+    {
+      "name": "AI Translate",
+      "author": "369 / community",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/AI%20Translate/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/AI%20Translate/plugin.json",
+      "version": 2,
+      "source": "https://platform.openai.com",
+      "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/AI%20Translate/icon.png",
+      "description": "Translate with Gemini, OpenAI, Anthropic or any OpenAI-compatible API. Supports key/model failover, chunking, named prompts and vBook glossaries. Set your own API key in the extension settings.",
+      "type": "translate",
+      "locale": "global"
     }
   ]
 }
