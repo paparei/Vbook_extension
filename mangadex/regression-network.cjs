@@ -12,7 +12,8 @@ function run(step, cached, age = 120000, route = '/manga', browserBody) {
     class Clock extends Date { constructor() { super(now); } }
     const context = vm.createContext({
         Date: Clock, console: { log() {} },
-        localStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+        cacheStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+        localStorage: { getItem: () => '1', setItem() {}, clear() {} },
         sleep: ms => { now += ms; },
         fetch: (url, options) => {
             calls++;

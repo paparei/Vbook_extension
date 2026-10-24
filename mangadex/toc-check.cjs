@@ -19,7 +19,8 @@ function run(chapters, configValue) {
     const context = vm.createContext({
         Date: Date,
         console: { log() {} },
-        localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+        cacheStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+        localStorage: { getItem: () => '1', setItem() {}, clear() {} },
         sleep: () => {},
         Response: {
             success: (data) => ({ ok: true, data: data }),

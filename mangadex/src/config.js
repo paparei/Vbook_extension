@@ -44,13 +44,23 @@ function cacheKey(url) {
     return 'md_api:' + url;
 }
 
-function readApiCache(url, maxAge) {
-    // ponytail: per-URL expiry; add LRU eviction only if storage pressure appears.
+// The API cache lives in cacheStorage (system-clearable); localStorage is persistent and grew unbounded.
+function purgeLegacyCache() {
     try {
-        var cached = JSON.parse(localStorage.getItem(cacheKey(url)) || 'null');
+        if (localStorage.getItem('md_cache_v2')) return;
+        // This extension only ever stored md_api:* cache entries in localStorage.
+        localStorage.clear();
+        localStorage.setItem('md_cache_v2', '1');
+    } catch (error) {}
+}
+
+function readApiCache(url, maxAge) {
+    purgeLegacyCache();
+    try {
+        var cached = JSON.parse(cacheStorage.getItem(cacheKey(url)) || 'null');
         var age = cached ? new Date().getTime() - cached.time : -1;
         if (!cached || !cached.time || !isFinite(age) || age < 0 || age >= maxAge) {
-            localStorage.removeItem(cacheKey(url));
+            cacheStorage.removeItem(cacheKey(url));
             return null;
         }
         return cached.data ? cached : null;
@@ -61,7 +71,7 @@ function readApiCache(url, maxAge) {
 
 function writeApiCache(url, data) {
     try {
-        localStorage.setItem(cacheKey(url), JSON.stringify({ time: new Date().getTime(), data: data }));
+        cacheStorage.setItem(cacheKey(url), JSON.stringify({ time: new Date().getTime(), data: data }));
     } catch (error) {}
 }
 
