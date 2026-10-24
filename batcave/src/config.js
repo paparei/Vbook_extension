@@ -82,7 +82,14 @@ function browserResponse(url) {
     var browser;
     try {
         browser = Engine.newBrowser();
-        browser.launch(url, 12000);
+        browser.launchAsync(url);
+        // The 404 body is a JS bot wall that redirects to the real page; poll until it's gone instead of a fixed launch() wait.
+        var ready = "document.title&&document.readyState!=='loading'&&!/function runModern\\(|showTs\\(|cf-chl-/.test(document.documentElement.innerHTML)?'1':'0'";
+        for (var i = 0; i < 100; i++) {
+            var state = browser.callJs(ready, 1000);
+            if (String(state && state.text ? state.text() : state).indexOf('1') >= 0) break;
+            browser.html(200);
+        }
         // Windows wraps callJs results in JSON; encoding protects HTML from the bridge's HTML parser.
         var value = browser.callJs('encodeURIComponent(JSON.stringify({url:location.href,html:document.documentElement.outerHTML}))', 3000);
         var text = value ? String(value.text ? value.text() : value) : '';
@@ -192,6 +199,11 @@ function parseComicList(doc) {
     var result = [];
     var seen = {};
     if (!doc) return result;
+    // "Latest" cards keep the title in a sibling link (image alt is empty).
+    var cardTitles = {};
+    doc.select('.latest__title a[href*=".html"]').forEach(function (anchor) {
+        cardTitles[normalizePageUrl(anchor.attr('href')).replace(/[?#].*$/, '')] = cleanText(anchor.text());
+    });
 
     doc.select('a[href*=".html"]').forEach(function (anchor) {
         var href = String(anchor.attr('href') || '');
@@ -209,6 +221,7 @@ function parseComicList(doc) {
         var name = cleanText(anchor.attr('title'));
         if (!name && titleElement) name = cleanText(titleElement.text());
         if (!name && image) name = cleanText(image.attr('alt') || image.attr('title'));
+        if (!name) name = cardTitles[link] || '';
         if (!name || /^(?:cover|image|poster|read more|thumbnail)$/i.test(name)) return;
 
         var badge = anchor.select('.chapter, .issue, .badge, .latest').first();
