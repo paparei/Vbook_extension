@@ -69,9 +69,20 @@ function readApiCache(url, maxAge) {
     }
 }
 
+// ponytail: insertion-order cap via an index key (cacheStorage cannot list keys); size-based cap if entries get huge.
+var CACHE_LIMIT = 50;
+var CACHE_INDEX = 'md_index';
+
 function writeApiCache(url, data) {
     try {
-        cacheStorage.setItem(cacheKey(url), JSON.stringify({ time: new Date().getTime(), data: data }));
+        var key = cacheKey(url);
+        var index = JSON.parse(cacheStorage.getItem(CACHE_INDEX) || '[]');
+        var kept = [];
+        for (var i = 0; i < index.length; i++) if (index[i] !== key) kept.push(index[i]);
+        kept.push(key);
+        while (kept.length > CACHE_LIMIT) cacheStorage.removeItem(kept.shift());
+        cacheStorage.setItem(key, JSON.stringify({ time: new Date().getTime(), data: data }));
+        cacheStorage.setItem(CACHE_INDEX, JSON.stringify(kept));
     } catch (error) {}
 }
 

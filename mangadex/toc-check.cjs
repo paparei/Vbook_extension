@@ -83,4 +83,20 @@ r = run([chapter('a', 'en', '5', {
 })], 'en');
 assert.equal(r.result.data[0].name, 'Vol. 2 Ch. 5 - Prologue [GroupX]');
 
-console.log('PASS: toc merges every configured language in priority order, filters the rest, keeps labels.');
+// API cache keeps at most CACHE_LIMIT entries; oldest evicted, rewrite refreshes position.
+const store = new Map();
+const cacheCtx = vm.createContext({
+    Date: Date, console: { log() {} },
+    cacheStorage: { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, v), removeItem: (k) => store.delete(k) },
+    localStorage: { getItem: () => '1', setItem() {}, clear() {} }
+});
+vm.runInContext(config, cacheCtx);
+for (let i = 0; i < 60; i++) cacheCtx.writeApiCache('u' + i, { result: 'ok', data: {} });
+cacheCtx.writeApiCache('u10', { result: 'ok', data: {} });
+cacheCtx.writeApiCache('u60', { result: 'ok', data: {} });
+assert.equal(JSON.parse(store.get('md_index')).length, 50);
+assert.equal(store.size, 51, '50 entries + index');
+assert.ok(!store.has('md_api:u11'), 'oldest evicted');
+assert.ok(store.has('md_api:u10'), 'rewrite refreshes position');
+
+console.log('PASS: toc language merge/labels; API cache capped at 50 entries.');
