@@ -25,6 +25,13 @@ function execute(url) {
     var artist = relationshipName(manga, 'artist');
     if (artist && artist !== author) author += (author ? ' • ' : '') + artist;
 
+    var comments = [];
+    var stats = apiRequest('/statistics/manga/' + mangaId, []);
+    var thread = stats && stats.statistics && stats.statistics[mangaId] && stats.statistics[mangaId].comments;
+    if (thread && thread.threadId && thread.repliesCount > 0) {
+        comments.push({ title: 'Bình luận (' + thread.repliesCount + ')', input: String(thread.threadId), script: 'comments.js' });
+    }
+
     return Response.success({
         name: normalizeTitle(attributes.title),
         cover: coverUrl(mangaId, manga, '512'),
@@ -34,6 +41,7 @@ function execute(url) {
         url: BASE_URL + '/title/' + mangaId,
         genres: genres,
         ongoing: attributes.status === 'ongoing',
-        nsfw: attributes.contentRating !== 'safe'
+        nsfw: attributes.contentRating !== 'safe',
+        comments: comments
     });
 }

@@ -1,6 +1,7 @@
 var BASE_URL = 'https://mangadex.org';
 var API_URL = 'https://api.mangadex.org';
 var UPLOADS_URL = 'https://uploads.mangadex.org';
+var FORUM_URL = 'https://forums.mangadex.org';
 var PAGE_SIZE = 24;
 var CHAPTER_PAGE_SIZE = 100;
 var LANGUAGE = 'vi,en';
@@ -67,7 +68,7 @@ function writeApiCache(url, data) {
 function validApiData(data, atHome) {
     return data && data.result === 'ok' && (atHome
         ? /^https:\/\//i.test(String(data.baseUrl || '')) && data.chapter && data.chapter.hash && Array.isArray(data.chapter.data)
-        : data.data && typeof data.data === 'object');
+        : (data.data && typeof data.data === 'object') || (data.statistics && typeof data.statistics === 'object'));
 }
 
 function browserApiRequest(url, deadline) {
