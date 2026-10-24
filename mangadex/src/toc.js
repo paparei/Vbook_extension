@@ -15,8 +15,11 @@ function execute(url) {
 
     var languages = languageList();
     var showLang = languages.length > 1;
-    var groups = {};
-    for (var l = 0; l < languages.length; l++) groups[languages[l]] = [];
+    var rank = {};
+    for (var l = 0; l < languages.length; l++) rank[languages[l]] = l;
+    // One entry per chapter number: the highest-priority language wins; same-language groups all stay.
+    var best = {};
+    var seen = 0;
 
     var offset = 0;
     var total = 1;
@@ -40,8 +43,14 @@ function execute(url) {
             var item = data.data[i];
             var attributes = item.attributes || {};
             var language = attributes.translatedLanguage;
-            if (!groups[language] || attributes.externalUrl) continue;
-            groups[language].push({
+            if (rank[language] === undefined || attributes.externalUrl) continue;
+            var key = attributes.chapter ? 'c' + attributes.chapter : 'id' + item.id;
+            var slot = best[key];
+            if (!slot || rank[language] < slot.rank) {
+                var num = parseFloat(attributes.chapter);
+                slot = best[key] = { rank: rank[language], num: isNaN(num) ? Infinity : num, index: slot ? slot.index : seen++, items: [] };
+            } else if (rank[language] > slot.rank) continue;
+            slot.items.push({
                 name: chapterLabel(attributes, item, language, showLang),
                 url: BASE_URL + '/chapter/' + item.id,
                 host: BASE_URL
@@ -52,10 +61,10 @@ function execute(url) {
         offset += data.data.length;
     }
 
+    var slots = [];
+    for (var k in best) slots.push(best[k]);
+    slots.sort(function (a, b) { return (a.num - b.num) || (a.index - b.index); });
     var merged = [];
-    for (var j = 0; j < languages.length; j++) {
-        var langChapters = groups[languages[j]];
-        for (var k = 0; k < langChapters.length; k++) merged.push(langChapters[k]);
-    }
+    for (var s = 0; s < slots.length; s++) merged = merged.concat(slots[s].items);
     return merged.length ? Response.success(merged) : Response.error('Không có chương phù hợp với ngôn ngữ đã cấu hình');
 }
