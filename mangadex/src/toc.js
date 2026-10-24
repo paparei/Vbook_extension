@@ -1,8 +1,9 @@
 load('config.js');
 
-function chapterLabel(attributes, item) {
+function chapterLabel(attributes, item, language, showLang) {
     var label = attributes.chapter ? 'Ch. ' + attributes.chapter : 'Oneshot';
     if (attributes.volume) label = 'Vol. ' + attributes.volume + ' ' + label;
+    if (showLang) label = '[' + language.toUpperCase() + '] ' + label;
     if (attributes.title) label += ' - ' + cleanText(attributes.title);
     var group = relationshipName(item, 'scanlation_group');
     return label + (group ? ' [' + group + ']' : '');
@@ -13,6 +14,7 @@ function execute(url) {
     if (!mangaId) return Response.error('URL MangaDex không hợp lệ');
 
     var languages = languageList();
+    var showLang = languages.length > 1;
     var groups = {};
     for (var l = 0; l < languages.length; l++) groups[languages[l]] = [];
 
@@ -40,7 +42,7 @@ function execute(url) {
             var language = attributes.translatedLanguage;
             if (!groups[language] || attributes.externalUrl) continue;
             groups[language].push({
-                name: chapterLabel(attributes, item),
+                name: chapterLabel(attributes, item, language, showLang),
                 url: BASE_URL + '/chapter/' + item.id,
                 host: BASE_URL
             });
@@ -50,8 +52,10 @@ function execute(url) {
         offset += data.data.length;
     }
 
+    var merged = [];
     for (var j = 0; j < languages.length; j++) {
-        if (groups[languages[j]].length) return Response.success(groups[languages[j]]);
+        var langChapters = groups[languages[j]];
+        for (var k = 0; k < langChapters.length; k++) merged.push(langChapters[k]);
     }
-    return Response.error('Không có chương phù hợp với ngôn ngữ đã cấu hình');
+    return merged.length ? Response.success(merged) : Response.error('Không có chương phù hợp với ngôn ngữ đã cấu hình');
 }

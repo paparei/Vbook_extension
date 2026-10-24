@@ -2,7 +2,7 @@
   "metadata": {
     "name": "MangaDex",
     "author": "paparei",
-    "version": 7,
+    "version": 8,
     "source": "https://mangadex.org",
     "regexp": "https?://(www\\.)?mangadex\\.org/(title|chapter)/[0-9a-fA-F-]{36}.*",
     "description": "Đọc manga đa ngôn ngữ trên MangaDex. Tự chuyển sang WebView khi kết nối gốc của vBook lỗi; thử lại có giới hạn trong 30 giây và tuân thủ giới hạn truy cập. Dữ liệu đã tải có thể cũ tối đa 24 giờ khi API lỗi. Không sử dụng proxy bên thứ ba.",
