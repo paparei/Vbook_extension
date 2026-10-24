@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "name": "AI Translate",
+    "author": "369 / community",
+    "version": 2,
+    "source": "https://platform.openai.com",
+    "description": "Four API formats with v96-inspired key/model failover, chunking, named prompts and book dictionaries. Based on Gemini Translate by 369/3690.",
+    "locale": "global",
+    "regexp": "",
+    "type": "translate",
+    "nsfw": false,
+    "encrypt": false
+  },
+  "script": {
+    "language": "language.js",
+    "model": "model.js",
+    "style": "style.js",
+    "translate": "translate.js"
+  },
+  "config": {
+    "support_auto_detect": true,
+    "max_line": 5000,
+    "max_length": 20000,
+    "PROVIDER": {
+      "title": "API provider",
+      "mode": "select",
+      "values": ["Gemini", "OpenAI", "Anthropic", "OpenAI-compatible"],
+      "default": "Gemini"
+    },
+    "API_URL": {
+      "title": "API base URL (blank = official; compatible requires URL including /v1 or provider prefix)",
+      "mode": "input",
+      "default": ""
+    },
+    "API_KEY": {
+      "title": "API key (optional only for keyless OpenAI-compatible servers)",
+      "mode": "input",
+      "default": ""
+    },
+    "MODEL": {
+      "title": "Model ID (required; use an exact ID available from your provider)",
+      "mode": "input",
+      "default": ""
+    },
+    "MAX_TOKENS": {
+      "title": "Max output tokens (including reasoning, where applicable)",
+      "mode": "input",
+      "format": "number",
+      "default": "8192"
+    },
+    "TOKEN_PARAMETER": {
+      "title": "OpenAI token parameter (auto: OpenAI=new, compatible=legacy)",
+      "mode": "select",
+      "values": ["auto", "max_tokens", "max_completion_tokens"],
+      "default": "auto"
+    },
+    "TEMPERATURE": {
+      "title": "Temperature (blank = provider default; some models require blank)",
+      "mode": "input",
+      "default": ""
+    },
+    "EXTRA_PROMPT": {
+      "title": "Additional translation instructions / glossary",
+      "mode": "input",
+      "default": ""
+    },
+    "API_KEYS": { "title": "API keys, one per line (overrides single key; same provider only)", "mode": "input", "default": "" },
+    "ROTATE_KEYS": { "title": "Rotate starting API key", "mode": "toggle", "default": "false" },
+    "KEY_FAILOVER": { "title": "Try next key on HTTP 401/403/429", "subtitle": "Additional requests; at most 6 attempts per chunk.", "mode": "toggle", "default": "false" },
+    "MODEL_LIST": { "title": "Additional model IDs, one per line (picker and fallback order)", "mode": "input", "default": "" },
+    "MODEL_FAILOVER": { "title": "Try fallback models", "subtitle": "May incur additional charges. HTTP 404/429/500/502/503 only; never refusal or incomplete output.", "mode": "toggle", "default": "false" },
+    "TOP_P": { "title": "Top P (blank = omitted, 0–1)", "mode": "input", "default": "" },
+    "TOP_K": { "title": "Gemini Top K (blank = omitted, 1–100; ignored for other providers)", "mode": "input", "default": "" },
+    "CHUNK_SIZE": { "title": "Characters per API chunk (256–20000)", "mode": "input", "format": "number", "default": "4000" },
+    "CHUNK_CONTEXT": { "title": "Send previous chunk ending for consistency", "subtitle": "Adds up to 500 translated characters to the next request within this text block.", "mode": "toggle", "default": "true" },
+    "PROMPT_PRESETS": { "title": "Named prompts as JSON: {\"wuxia\":\"Use formal dialogue.\"}", "mode": "input", "default": "{}" },
+    "USE_GLOSSARY": { "title": "Use shared/book glossary and vBook name dictionaries", "mode": "toggle", "default": "true" },
+    "glossary": { "title": "Glossary: original term → preferred translation", "mode": "database" },
+    "USE_NAME_FILTER": { "title": "Suggest recurring Chinese names", "subtitle": "Heuristic guidance, not source replacement; may include false positives.", "mode": "toggle", "default": "false" },
+    "NAME_MIN": { "title": "Minimum candidate name length", "mode": "input", "format": "number", "default": "2" },
+    "NAME_MAX": { "title": "Maximum candidate name length", "mode": "input", "format": "number", "default": "5" },
+    "NAME_REPEAT": { "title": "Minimum name occurrences per text block", "mode": "input", "format": "number", "default": "3" },
+    "NAME_SURNAMES": { "title": "Chinese surnames, one per line", "mode": "input", "default": "张\n王\n李\n赵\n陈\n刘\n林\n杨\n黄\n周\n吴\n徐\n孙\n胡\n朱\n郭\n何\n高\n罗\n郑\n欧阳\n司马\n上官\n诸葛" },
+    "NAME_SUFFIXES": { "title": "Additional Chinese name suffixes, one per line", "mode": "input", "default": "" },
+    "NAME_STOP_WORDS": { "title": "Ignore candidates containing these words, one per line", "mode": "input", "default": "" }
+  }
+}
