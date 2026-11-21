@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "name": "NetTruyenIndex",
+    "author": "vBook",
+    "version": 1,
+    "source": "https://nettruyen16s.com",
+    "description": "Đọc truyện tranh tiếng Việt trên NetTruyen.",
+    "locale": "vi",
+    "regexp": "^(?:https?://)?(?:www\\.)?nettruyen(?:index|16s)\\.com/manga/[^/?#]+/?(?:[?#].*)?$",
+    "type": "comic",
+    "nsfw": false
+  },
+  "script": {
+    "home": "home.js",
+    "explore": "explore.js",
+    "genre": "genre.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "DOMAIN": {
+      "title": "Tên miền",
+      "default": "https://nettruyen16s.com",
+      "mode": "input"
+    }
+  }
+}

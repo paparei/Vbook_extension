@@ -5,6 +5,17 @@
   },
   "data": [
     {
+      "name": "NetTruyenIndex",
+      "author": "vBook",
+      "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/nettruyenindex/plugin.zip",
+      "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/nettruyenindex/plugin.json",
+      "version": 1,
+      "source": "https://nettruyen16s.com",
+      "description": "Đọc truyện tranh tiếng Việt trên NetTruyen.",
+      "type": "comic",
+      "locale": "vi"
+    },
+    {
       "name": "Weeb Central",
       "author": "vBook",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/weebcentral/plugin.zip",
