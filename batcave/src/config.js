@@ -255,6 +255,7 @@ function hasNextPage(doc, currentPage) {
 function readerLinks(doc, html) {
     var result = [];
     var seen = {};
+    var startUrl = '';
 
     function add(url, name) {
         url = normalizePageUrl(url);
@@ -265,7 +266,12 @@ function readerLinks(doc, html) {
 
     if (doc) {
         doc.select('a[href*="/reader/"]').forEach(function (anchor) {
-            add(anchor.attr('href'), anchor.attr('title') || anchor.text());
+            var name = anchor.attr('title') || anchor.text();
+            if (/^start reading$/i.test(trimText(anchor.text())) || /^start reading$/i.test(trimText(name))) {
+                startUrl = normalizePageUrl(anchor.attr('href'));
+            } else {
+                add(anchor.attr('href'), name);
+            }
         });
         doc.select('option[value*="/reader/"]').forEach(function (option) {
             add(option.attr('value'), option.text());
@@ -273,6 +279,21 @@ function readerLinks(doc, html) {
         doc.select('[data-href*="/reader/"]').forEach(function (element) {
             add(element.attr('data-href'), element.attr('title') || element.text());
         });
+    }
+    // Preserve specials in source order relative to numbered issues.
+    var firstNumber = null;
+    var lastNumber = null;
+    for (var i = 0; i < result.length; i++) {
+        var number = /#\s*(-?\d+(?:\.\d+)?)/.exec(result[i].name);
+        if (!number) continue;
+        lastNumber = Number(number[1]);
+        if (firstNumber === null) firstNumber = lastNumber;
+    }
+    if (firstNumber > lastNumber) result.reverse();
+    if (startUrl && !seen[startUrl]) {
+        var count = result.length;
+        add(startUrl, 'Start Reading');
+        if (result.length > count) result.unshift(result.pop());
     }
 
     var source = String(html || '').replace(/\\\//g, '/').replace(/&/gi, '&');

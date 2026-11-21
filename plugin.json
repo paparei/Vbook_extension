@@ -80,7 +80,7 @@
       "author": "paparei",
       "path": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/plugin.zip",
       "lib": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/plugin.json",
-      "version": 5,
+      "version": 6,
       "source": "https://batcave.biz",
       "icon": "https://raw.githubusercontent.com/paparei/Vbook_extension/main/batcave/icon.png",
       "description": "Read English comics from BatCave. Open Source page and sign in if authentication is required.",
