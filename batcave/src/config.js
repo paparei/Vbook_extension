@@ -281,15 +281,20 @@ function readerLinks(doc, html) {
         });
     }
     // Preserve specials in source order relative to numbered issues.
-    var firstNumber = null;
-    var lastNumber = null;
-    for (var i = 0; i < result.length; i++) {
-        var number = /#\s*(-?\d+(?:\.\d+)?)/.exec(result[i].name);
-        if (!number) continue;
-        lastNumber = Number(number[1]);
-        if (firstNumber === null) firstNumber = lastNumber;
+    var labels = [/#\s*(-?\d+(?:\.\d+)?)/, /\b(?:vol(?:ume)?\.?|tpb|book)\s*(\d+(?:\.\d+)?)/i, /\bpart\s*(\d+)/i];
+    for (var k = 0; k < labels.length; k++) {
+        var first = null;
+        var last = null;
+        for (var i = 0; i < result.length; i++) {
+            var number = labels[k].exec(result[i].name);
+            if (!number) continue;
+            last = Number(number[1]);
+            if (first === null) first = last;
+        }
+        if (first === last) continue;
+        if (first > last) result.reverse();
+        break;
     }
-    if (firstNumber > lastNumber) result.reverse();
     if (startUrl && !seen[startUrl]) {
         var count = result.length;
         add(startUrl, 'Start Reading');
